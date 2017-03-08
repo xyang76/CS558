@@ -15,13 +15,13 @@ static int lkm_init(void)
 
     //Hide this module from /sys/modules
     kobject_del(&THIS_MODULE->mkobj.kobj);
-    printk(“Hello world, module loaded\n");
+    printk("Hello world, module loaded\n");
     return 0;    
 }
  
 static void lkm_exit(void)
 {
-    printk(“Hello world, module removed\n");
+    printk("Hello world, module removed\n");
 }
  
 module_init(lkm_init);
