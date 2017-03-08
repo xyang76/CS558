@@ -3,10 +3,6 @@
 #include <linux/module.h>    
 #include <linux/kernel.h>   
 #include <linux/init.h>     
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR(“Xincheng Yang”);
-MODULE_DESCRIPTION(“A simple rootkit”);   
  
 static int lkm_init(void)
 {
