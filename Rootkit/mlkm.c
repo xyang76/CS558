@@ -36,6 +36,10 @@ static int lkm_init(void)
     return 0;    
 }
 
+/**
+ * @brief This is the function to hook system call table
+ * @return the entry(array) of system call table
+ */
 unsigned long ** hook_syscall_table(void)
 {
   unsigned long **entry = (unsigned long **)PAGE_OFFSET;
