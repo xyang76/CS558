@@ -2,6 +2,7 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/syscalls.h>
+#include <linux/dirent.h>
 #include <linux/string.h> 
 //#include "export.h"
 
