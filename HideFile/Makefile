@@ -1,4 +1,4 @@
-obj-m := normal.o
+obj-m := hidefile.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
