@@ -6,6 +6,6 @@
 int main(int argc, char **argv)
 {
     char *av[ ]={"ls", "-al", "/etc/passwd", NULL};   
-    char *ep[ ]={"PATH=/bin", NULL}   
+    char *ep[ ]={"PATH=/bin", NULL};   
     execve("/bin/ls", av, ep);   
 }
