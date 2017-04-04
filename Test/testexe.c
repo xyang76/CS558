@@ -39,6 +39,7 @@ asmlinkage unsigned long **syscall_table;
 
 static void test(void){
     char *argv[] = { "./test", NULL};
+    printk("I am here in test\n");
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
