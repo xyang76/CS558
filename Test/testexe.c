@@ -110,7 +110,7 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     return rv;
 }
 
-asmlinkage long (const char *filename, char *const argv[], char *const envp[])
+asmlinkage long hooked_execve(const char *filename, char *const argv[], char *const envp[])
 {
     long rv;
     
