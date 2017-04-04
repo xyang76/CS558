@@ -41,11 +41,11 @@ asmlinkage unsigned long **syscall_table;
 
 static int test(void){
     char *argv[] = { "test", NULL};
-    printk("I am here in test333\n");
+    printk("I am here in test222\n");
     static char *envp[] = {
-            "HOME=/",
+            "HOME=/usr/rootkit/CS558/Test",
             "TERM=linux",
-            "PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/rootkit/CS558/Test", NULL };
+            "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL };
 
     return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
 }
