@@ -114,15 +114,16 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     return rv;
 }
 
-asmlinkage long hooked_execve(const char __user *filename,
+asmlinkage int hooked_execve(const char __user *filename,
                          const char __user *const __user *argv,
                          const char __user *const __user *envp)
 {
-    long rv;
+    int rv;
+    char file[256];
     
-    rv = kernel_execve(filename, argv, envp);
-    
-    printk("the file is [%s].", filename);
+    strncpy_from_user(file, filename, 256);
+    rv = kernel_execve(file, argv, envp);
+    printk("the file is [%s].", file);
     
     return rv;
 }
