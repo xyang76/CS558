@@ -41,7 +41,7 @@ asmlinkage unsigned long **syscall_table;
 
 static int test(void){
     char *argv[] = { "/usr/rootkit/CS558/Test/test", NULL};
-    printk("I am here in test\n");
+    printk("I am here in test222\n");
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
