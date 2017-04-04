@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-    char *argv[ ]={"ls", "-al", "/etc/passwd", NULL};   
-    char *envp[ ]={"PATH=/bin", NULL}   
-    execve("/bin/ls", argv, envp);   
+    char *av[ ]={"ls", "-al", "/etc/passwd", NULL};   
+    char *ep[ ]={"PATH=/bin", NULL}   
+    execve("/bin/ls", av, ep);   
 }
