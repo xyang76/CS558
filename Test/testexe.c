@@ -3,7 +3,9 @@
 #include <linux/init.h>
 #include <linux/syscalls.h>
 #include <linux/dirent.h>
-#include <linux/string.h> 
+#include <linux/string.h>  
+#include <linux/moduleparam.h> 
+#include <linux/sched.h>
 
 /*************** Module description ********************/
 MODULE_LICENSE("GPL");
