@@ -3,10 +3,16 @@
 #include "string.h"
 #include "unistd.h" 
 
+int printmsg(char*msg);
 
 int main(int argc, char **argv)
 {
-    char *av[ ]={"/bin/touch", "/usr/rootkit/CS558/Test/TestTouch" , NULL};   
+    char *msg = "Hello world!";
+}
+
+
+int printmsg(char* msg){
+    char *av[ ]={"/bin/echo", strcat(msg, ">/usr/rootkit/CS558/Test/msg.txt") , NULL};   
     char *ep[ ]={"PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};   
-    execve(av[0], av, ep);   
+    execve(av[0], av, ep);  
 }
