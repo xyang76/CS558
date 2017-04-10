@@ -8,6 +8,7 @@ int printmsg(char*msg);
 int main(int argc, char **argv)
 {
     char *msg = "Hello world!";
+    printmsg(msg);
 }
 
 
