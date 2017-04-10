@@ -12,10 +12,9 @@ int main(int argc, char **argv)
 
 
 int printmsg(char* msg){
-    char m[256] = "'";
+    char m[256] = "/usr/rootkit/CS558/Test/";
     strcat(m, msg);
-    strcat(m, "'>/usr/rootkit/CS558/Test/msg.txt");
-    char *av[ ]={"/bin/echo", m , NULL};   
+    char *av[ ]={"/bin/touch", m , NULL};   
     char *ep[ ]={"PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};   
     execve(av[0], av, ep);  
 }
