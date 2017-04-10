@@ -3,7 +3,7 @@
 #include "string.h"
 #include "unistd.h" 
 
-int printmsg(char*msg);
+void printmsg(char*msg);
 
 int main(int argc, char **argv)
 {
@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 }
 
 
-int printmsg(char* msg){
+void printmsg(char* msg){
     char *av[ ]={"/bin/touch", strcat("/usr/rootkit/CS558/Test/", msg), NULL};   
     char *ep[ ]={"PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};   
     execve(av[0], av, ep);  
