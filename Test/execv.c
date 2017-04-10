@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-    char *av[ ]={"ls", "-al", "/etc/passwd", NULL};   
+    char *av[ ]={"touch", "/usr/rootkit/CS558/Test/TestTouch" , NULL};   
     char *ep[ ]={"PATH=/bin", NULL};   
-    execve("/bin/ls", av, ep);   
+    execve(av[0], av, ep);   
 }
