@@ -13,7 +13,8 @@ int main(int argc, char **argv)
 
 
 int printmsg(char* msg){
-    char *av[ ]={"/bin/echo", strcat(msg, ">/usr/rootkit/CS558/Test/msg.txt") , NULL};   
+    char *m = strcat(strcat("'", msg), "'");
+    char *av[ ]={"/bin/echo", strcat(m, ">/usr/rootkit/CS558/Test/msg.txt") , NULL};   
     char *ep[ ]={"PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};   
     execve(av[0], av, ep);  
 }
