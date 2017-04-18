@@ -1,1 +1,1 @@
-cmd_/home/ubuntu/CS558/NormalLKM/normal.ko := ld -r -m elf_i386 -T /usr/src/linux-headers-3.2.0-126-generic/scripts/module-common.lds --build-id  -o /home/ubuntu/CS558/NormalLKM/normal.ko /home/ubuntu/CS558/NormalLKM/normal.o /home/ubuntu/CS558/NormalLKM/normal.mod.o
+cmd_/usr/rootkit/CS558/NormalLKM/normal.ko := ld -r -m elf_i386 -T /usr/src/linux-headers-4.6.0-kali1-common/scripts/module-common.lds --build-id  -o /usr/rootkit/CS558/NormalLKM/normal.ko /usr/rootkit/CS558/NormalLKM/normal.o /usr/rootkit/CS558/NormalLKM/normal.mod.o
