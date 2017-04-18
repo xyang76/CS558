@@ -1,2 +1,2 @@
-/usr/rootkit/CS558/NormalLKM/normal.ko
-/usr/rootkit/CS558/NormalLKM/normal.o
+/home/ubuntu/CS558/NormalLKM/normal.ko
+/home/ubuntu/CS558/NormalLKM/normal.o
