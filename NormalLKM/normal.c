@@ -11,6 +11,7 @@ static int lkm_init(void)
 
     //Hide this module from /sys/modules
     //kobject_del(&THIS_MODULE->mkobj.kobj);
+    ﻿MODULE_INFO(vermagic, "123444");
     printk("Hello world, module loaded\n");
     return 0;    
 }
