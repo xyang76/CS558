@@ -742,6 +742,8 @@ deps_/usr/rootkit/CS558/NormalLKM/normal.o := \
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
+  /usr/src/linux-headers-4.6.0-kali1-common/include/linux/vermagic.h \
+  include/generated/utsrelease.h \
 
 /usr/rootkit/CS558/NormalLKM/normal.o: $(deps_/usr/rootkit/CS558/NormalLKM/normal.o)
 
