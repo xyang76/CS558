@@ -10,11 +10,10 @@
 #include <sys/shm.h>
 #include <errno.h>
 
-
-#define BUFFER_SIZE 4096
 #define SP_PORT     8890
+#define BUFFER_SIZE 4096
 #define SERVER_ADDR "127.0.0.1"
-char* ROOTKIT = "/Volumes/F/test/hidefile.ko\n";     // '\n' just for read easier(line by line).
+char* ROOTKIT = "/Volumes/F/test/123.txt\n"     // '\n' just for read easier(line by line).
 
 static int readbuf(int conn, char* buf, int size);
 static int getIntFromBuf(char* buf, int offset);
@@ -44,7 +43,7 @@ int main()
     memset(recvbuf, 0, sizeof(recvbuf));    
     readbuf(sock_cli, recvbuf, 4);                  // Read file size
     filesize = getIntFromBuf(recvbuf, 0);
-     printf("size = %d\n", filesize);
+    
     memset(recvbuf, 0, sizeof(recvbuf));
     fp=fopen("test.txt","w+");                      // Obtain file with buffer
     while(filesize > 0){
@@ -59,6 +58,46 @@ int main()
         }
     }
     
+//    readbuf(sock_cli, recvbuf, BUFFER_SIZE);
+//    printf("value is [%s]", recvbuf);
+//    memset(recvbuf, 0, sizeof(recvbuf));
+
+//    while (1)
+//    {
+//        printf("Yes2\n");
+//        int recvd = recv(sock_cli, sock_cli, sizeof(recvbuf),0);
+//        printf("%s\n", recvbuf);
+//        if(strcmp(recvbuf,"exit\n")==0 || strcmp(recvbuf,"exec exit\n")==0)
+//            break;
+//        fputs(recvbuf, stdout);
+//        
+//        send(sock_cli, sendbuf, strlen(sendbuf),0);     //Tell the remote machine it is ready again
+//        memset(recvbuf, 0, sizeof(recvbuf));
+//    }
+    
+//    while(1)
+//    {
+//        int cnt = (int)recv(sock_cli, recvbuf, sizeof(recvbuf), 0);
+////        cnt = (int)recv(sock_cli, recvbuf,sizeof(recvbuf), 0);
+//        if( cnt >0 )
+//        {
+//            printf("Yes3\n");
+//            if(cnt == 1){
+//                printf("receve %d %d %d %d %d\n", recvbuf[0], recvbuf[1], recvbuf[2], recvbuf[3], recvbuf[4]);
+//            }
+//            printf("%d[%s]\n", cnt, recvbuf);
+//            if(strcmp(recvbuf,"e\n")==0 || strcmp(recvbuf,"exec exit\n")==0)
+//                break;
+////            break;
+////            send(sock_cli, sendbuf, strlen(sendbuf),0);     //Tell the remote machine it is ready again
+//            memset(recvbuf, 0, sizeof(recvbuf));
+//            
+//        }
+//        else
+//       {
+//           continue;
+//        }
+//    }
     fclose(fp);
     close(sock_cli);
     return 0;

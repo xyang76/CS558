@@ -10,7 +10,7 @@
 #include <sys/shm.h>
 #include <pthread.h>
 
-#define SP_PORT  9998
+#define SP_PORT  9999
 #define QUEUE   20
 #define BUFFER_SIZE 1024
 
@@ -22,9 +22,7 @@ void thread(int conn)
     {
         memset(buffer,0,sizeof(buffer));
         int len = recv(conn, buffer, sizeof(buffer),0);
-        if(strcmp(buffer,"exit\n")==0)
-            break;
-        if(strcmp(buffer,"exit0\n")==0){
+        if(strcmp(buffer,"exit\n")==0) {
             runable = 0;
             break;
         }
@@ -65,12 +63,13 @@ int main()
     
     runable = 1;
     while(runable){
+        printf("ready\n");
         int conn = accept(server_sockfd, (struct sockaddr*)&client_addr, &length);
         if(conn<0)
         {
             exit(1);
         }
-        printf("get a new connection from %s\n", client_addr.sin_addr.s_addr);
+        printf("get a new connection from %s\n", inet_ntoa(client_addr.sin_addr));
         rv=pthread_create(&tid,&attr,(void *) thread, (void*)conn);
     }
     pthread_attr_destroy(&attr);
