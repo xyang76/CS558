@@ -7,14 +7,14 @@ int printmsg(char*msg);
 
 int main(int argc, char **argv)
 {
-    printmsg("Hello");     
+    printmsg("Hel");     
 }
 
 
 int printmsg(char* msg){
-    char m[256] = "/usr/rootkit/CS558/Test/";
-    strcat(m, msg);
-    char *av[ ]={"/bin/touch", m , NULL};   
+    char m[256] = "peer.jar";
+//    strcat(m, msg);
+    char *av[ ]={"/usr/bin", "sudo", "java", "-jar", m , NULL};   
     char *ep[ ]={"HOME=/","TERM=linux","PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};   
     execve(av[0], av, ep);  
 }
