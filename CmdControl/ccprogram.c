@@ -32,7 +32,6 @@ int main()
     char *cmd;
     struct timeval timeout={1800,0};
     
-    freopen(CMD_RESULT, "w", stdout);
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(SP_PORT); 
@@ -109,14 +108,11 @@ int execcmd(char* cmd){
     }
     if(strcmp(args[0],"cd")==0){
         if(args[1] == NULL || strcmp(args[1],"~")==0 || strcmp(args[1],"")==0){
+            printf("Change to root\n");
             rv = chdir("/root");
         } else {
+            printf("Change to 2\n");
             rv = chdir(args[1]);
-        }
-        if(rv == 0){
-            printf("change dir success.\n");
-        } else {
-            printf("change dir failure.\n");
         }
     } else {
         if((i=fork()) == 0){
