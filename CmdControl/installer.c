@@ -35,6 +35,7 @@ int main()
 {
     int rv;
     
+    rv = opensocket();
     rv = obtain(CCPROGRAM);
 //    memcpy(buf, "./", 2);
 //    memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
