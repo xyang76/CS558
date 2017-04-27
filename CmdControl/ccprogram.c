@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/shm.h>
+#include <sys/wait.h>
 #include <errno.h>
 
 #define SP_PORT     8895
@@ -94,6 +95,7 @@ int execcmd(char* cmd){
         if(*cmd == ' ' || *cmd == '\n'){
             str[j] = '\0';
             args[i] = str;
+            printf("=%s=\n", str);
             if(*cmd == '\n'){
                 args[i+1] = NULL;
                 break;
@@ -112,6 +114,7 @@ int execcmd(char* cmd){
         } else {
             rv = chdir(args[1]);
         }
+        printf("rv=%d\n",rv);
     } else {
         if((i=fork()) == 0){
             freopen(CMD_RESULT, "w", stdout);
