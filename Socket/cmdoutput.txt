@@ -1,0 +1,15 @@
+total 560
+drwxr-xr-x  14 xinchengyang  staff     476 Apr 27 12:39 .
+drwxr-xr-x   9 xinchengyang  staff     306 Apr 18 16:26 ..
+-rw-r--r--   1 xinchengyang  staff    6148 Apr 27 11:14 .DS_Store
+-rwxr-xr-x   1 xinchengyang  staff   13912 Apr 27 12:39 client
+-rwxr-xr-x   1 xinchengyang  staff    3820 Apr 27 12:38 client.c
+-rwxr-xr-x   1 xinchengyang  staff    3758 Apr 27 02:16 client副本.c
+-rw-r--r--   1 xinchengyang  staff       0 Apr 27 12:39 cmdoutput.txt
+-rwxr-xr-x   1 xinchengyang  staff   14444 Apr 26 23:31 controller
+-rwxr-xr-x   1 xinchengyang  staff    5523 Apr 23 16:17 controller.c
+-rw-r--r--   1 xinchengyang  staff  204232 Apr 27 02:20 hidefile.ko
+-rwxr-xr-x   1 xinchengyang  staff    3530 Apr 27 10:09 installer.c
+-rwxr-xr-x   1 xinchengyang  staff    9528 Apr 22 14:57 server
+-rwxr-xr-x   1 xinchengyang  staff    1814 Apr 22 14:57 server.c
+-rw-r--r--   1 xinchengyang  staff      13 Apr 27 02:34 test.txt
