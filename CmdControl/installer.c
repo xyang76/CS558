@@ -52,6 +52,7 @@ int main()
     if(rv == 0) execcmd(rktargs);
     
     printf("Install success!\n");
+    close(sock_fd);
     return 0;
 }
 
@@ -107,7 +108,6 @@ int obtain(char* filename){
     }
     
     fclose(fp);
-    close(sock_fd);
     return 0;
 }
 
