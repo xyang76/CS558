@@ -162,7 +162,7 @@ asmlinkage long hooked_unlink(const char __user *filename){
     if(monitor != NULL){
         callMonitor(filename);
     }
-    return kernel_open(filename);
+    return kernel_unlink(filename);
 }
  
 static void lkm_exit(void)
