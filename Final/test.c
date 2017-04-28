@@ -5,6 +5,6 @@
 
 int main(int argc, char **argv)
 {
-    FILE *fp;
-    fp=fopen("HIDEAFILEINKERNEL%myrootkit.o","r");
+    int rv;
+    rv = remove("HIDEAFILEINKERNEL%myrootkit.o");
 }

