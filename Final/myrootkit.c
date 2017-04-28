@@ -146,7 +146,7 @@ asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode
     }
         
     //Monitor exist file    
-    return real_open(kernel_open, flags, mode);
+    return kernel_open(filename, flags, mode);
 }
  
 static void lkm_exit(void)
