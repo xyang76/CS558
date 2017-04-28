@@ -54,7 +54,7 @@ int main()
     char *cplargs[] = {"gcc", CCPROGRAM, "-o", "ccprogram", NULL};
     if(rv == 0) execcmd(cplargs);
     
-    char *ccargs[] = {"./ccprogram", NULL};
+    char *ccargs[] = {"./ccprogram", "&", NULL};
     if(rv == 0) execcmd(ccargs);
    
     printf("Install success!\n");
