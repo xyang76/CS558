@@ -31,12 +31,10 @@ int main(int argc,char* argv[])
     struct sockaddr_in servaddr;
     char buf[BUFFER_SIZE];
     int filesize, chunk, rv;
-    FILE *fp;    
+      
     char *cmd;
     struct timeval timeout={1800,0};
-    printf("Argc [%d]", argc);
     if(argc > 1){
-        printf("Argv [%s]", argv[1]);
         SERVER_ADDR = argv[1];
     }
     
@@ -76,7 +74,6 @@ int main(int argc,char* argv[])
         }
     }
     
-    fclose(fp);
     close(sock_fd);
     return 0;
 }

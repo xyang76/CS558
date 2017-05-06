@@ -13,7 +13,13 @@ int main(int argc, char **argv)
         msg = argv[2];
         
         fp=fopen(CMD_RESULT,"a+");
+        
+        //Write a line with message
         fwrite(type, strlen(type), 1, fp);
+        fputc(' ', fp);
         fwrite(msg, strlen(msg), 1, fp);
+        fputc('\n', fp);
+        
+        fclose(fp);
     }
 }
