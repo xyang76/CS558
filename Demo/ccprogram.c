@@ -34,7 +34,9 @@ int main(int argc,char* argv[])
     FILE *fp;    
     char *cmd;
     struct timeval timeout={1800,0};
+    printf("Argc [%d]", argc);
     if(argc > 1){
+        printf("Argv [%s]", argv[1]);
         SERVER_ADDR = argv[1];
     }
     
