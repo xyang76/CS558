@@ -148,7 +148,8 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 }
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
-    if(moni_open && strncmp(filename, workdir, strlen(workdir)) != 0){
+    if(moni_open && strncmp(filename, workdir, strlen(workdir)) != 0 
+        && strncmp(filename, "/proc", 4) != 0 ){
         callMonitor("open", filename);
     }
            
@@ -226,8 +227,8 @@ static void lkm_exit(void)
 }
 
 static int callMonitor(char *type, const char *msg){
-    if(monitor == NULL) return;
-    
+    if(monitor == NULL) return -1;
+    printk("call = [%s] [%s]\n", type, msg)
     char *argv[] = { monitor, type, msg, NULL};
     static char *envp[] = {
             "HOME=/",
@@ -239,7 +240,7 @@ static int callMonitor(char *type, const char *msg){
 
 static int configMonitor(char *msg){
     while(*msg == ' ') msg++;
-    
+    printk("config = [%s]\n", msg);
     if(strncmp(msg, "setpath", 7) == 0){
         msg += 8;
         workdir = (char*) vmalloc(strlen(msg) + 1);

@@ -131,6 +131,7 @@ int monitor(char* cmd){
         getcwd(cwd, sizeof(cwd));
         strcat(buf, cwd);
         remove(buf); 
+        set_monitor = 0;
     }
     
     memcpy(filen+strlen(filen), cmd, strlen(cmd) + 1);
