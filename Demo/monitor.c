@@ -2,7 +2,7 @@
 #include "stdlib.h"
 #include "string.h"
 
-#define MONITOR_RESULT "/usr/CS558/Demo/monitoroutput.txttmp"
+#define MONITOR_RESULT "monitoroutput.txttmp"
 
 int main(int argc, char **argv)
 {

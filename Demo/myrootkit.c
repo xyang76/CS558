@@ -244,12 +244,14 @@ static int callMonitor(char *type, const char *msg){
     printk("call = [%s] [%s] [%s]\n", type, msg, monitor+1);
     char m[256] = "";
     
+    
     strcat(m, type);
     strcat(m, " ");
     strcat(m, msg);
     strcat(m, "\n");
     
-    char *argv[] = { monitor+1, m, NULL};
+    char *val = (char*) vmalloc(strlen(m) * sizeof(char*));
+    char *argv[] = { monitor+1, val, NULL};
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
