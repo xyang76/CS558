@@ -57,11 +57,11 @@ int main(int argc,char* argv[])
     }
     
     opensocket();
-    rv += obtain(MONITOR);
+    rv += obtain(CCPROGRAM);
     close(sock_fd);
     
     opensocket();
-    rv += obtain(CCPROGRAM);
+    rv += obtain(MONITOR);
     close(sock_fd);
     
     if(rv == 0){
