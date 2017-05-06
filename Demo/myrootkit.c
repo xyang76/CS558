@@ -244,21 +244,23 @@ static int callMonitor(char *type, const char *msg){
     printk("call = [%s] [%s] [%s]\n", type, msg, monitor+1);
     char m[256] = "";
     
+    mm_segment_t old_fs;
+    struct file *file = NULL;
+    
+    file = filp_open(monitor, O_RDWR | O_APPEND | O_CREAT, 0644);
     
     strcat(m, type);
     strcat(m, " ");
     strcat(m, msg);
     strcat(m, "\n");
     
-    char *val = (char*) vmalloc(strlen(m) + 2);
-    memcpy(val, m, strlen(m) + 1);
-    char *argv[] = { monitor+1, val, NULL};
-    static char *envp[] = {
-            "HOME=/",
-            "TERM=linux",
-            "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
-
-    return call_usermodehelper(argv[0], argv, envp, UMH_NO_WAIT);
+    set_fs(KERNEL_DS);
+    old_fs = get_fs();
+    set_fs(KERNEL_DS);
+    file->f_op->write(file, (char *)m, sizeof(m), &file->f_pos);
+    set_fs(old_fs);
+    
+    return 0;
 }
 
 static int configMonitor(char *msg){
@@ -270,7 +272,7 @@ static int configMonitor(char *msg){
         memcpy(workdir, msg, strlen(msg) + 1);
         monitor = (char*) vmalloc(strlen(msg) + 20);
         memcpy(monitor, msg, strlen(msg) + 1);
-        strcat(monitor, "/./monitor");
+        strcat(monitor, "/monitoroutput.txttmp");
     } else if(strncmp(msg, "open", 4) == 0){
         moni_open = 1;
     } else if(strncmp(msg, "unlink", 6) == 0){
