@@ -42,8 +42,6 @@ int moni_open;
 int moni_unlink;
 int moni_sys_init_module;
 
-
-
 /*
  * Disable write protection for hook system call table
  */

