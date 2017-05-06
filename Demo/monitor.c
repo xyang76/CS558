@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     char *msg = "NULL";
     FILE *fp;
     if(argv[1] != NULL){
-        *msg = argv[1];
+        msg = argv[1];
     }
 
     fp=fopen(MONITOR_RESULT,"a+");
