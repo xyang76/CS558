@@ -228,7 +228,7 @@ static void lkm_exit(void)
 
 static int callMonitor(char *type, const char *msg){
     if(monitor == NULL) return -1;
-    printk("call = [%s] [%s]\n", type, msg)
+    printk("call = [%s] [%s]\n", type, msg);
     char *argv[] = { monitor, type, msg, NULL};
     static char *envp[] = {
             "HOME=/",
