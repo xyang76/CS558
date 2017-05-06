@@ -12,7 +12,7 @@ int main(int argc, char **argv)
         type = argv[1];
         msg = argv[2];
         
-        fp=fopen(CMD_RESULT,"a+");
+        fp=fopen(MONITOR_RESULT,"a+");
         
         //Write a line with message
         fwrite(type, strlen(type), 1, fp);
