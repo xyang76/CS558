@@ -251,11 +251,10 @@ static int callMonitor(char *type, const char *msg){
     strcat(m, workdir);
     strcat(m, "/");
     strcat(m, MONITOR_RESULT);
-    strcat(m, "/");
     
     printk("call = [%s] [%s]\n", monitor, m);
     
-    char *argv[] = { "echo", m, NULL};
+    char *argv[] = { "bin/echo", m, NULL};
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
