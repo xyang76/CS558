@@ -240,8 +240,8 @@ static int callMonitor(char *type, const char *msg){
 static int configMonitor(char *msg){
     while(*msg == ' ') msg++;
     
-    if(strncmp(msg, "set", 3) == 0){
-        msg += 4;
+    if(strncmp(msg, "setpath", 7) == 0){
+        msg += 8;
         workdir = (char*) vmalloc(strlen(msg) + 1);
         memcpy(workdir, msg, strlen(msg) + 1)；
         monitor = (char*) vmalloc(strlen(msg) + 20);

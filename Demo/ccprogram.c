@@ -126,11 +126,10 @@ int monitor(char* cmd){
     while(*cmd == ' ') cmd++;
     
     if(set_monitor){
-        char cwd[200], buf[256] = "SETMONITORPROGRAM%set ";
+        char cwd[200], buf[256] = "SETMONITORPROGRAM%setpath ";
         
         getcwd(cwd, sizeof(cwd));
         strcat(buf, cwd);
-        strcat(buf, "/./monitor");
         remove(buf); 
     }
     
