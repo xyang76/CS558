@@ -6,20 +6,16 @@
 
 int main(int argc, char **argv)
 {
-    char *type = "NULL", *msg = "NULL";
+    char *msg = "NULL";
     FILE *fp;
-    if(argc > 2){
-        type = argv[1];
-        msg = argv[2];
+    if(argv[1] != NULL){
+        *msg = argv[1];
     }
 
     fp=fopen(MONITOR_RESULT,"a+");
     
     //Write a line with message
-    fwrite(type, strlen(type), 1, fp);
-    fputc(' ', fp);
     fwrite(msg, strlen(msg), 1, fp);
-    fputc('\n', fp);
     
     fclose(fp);
 }
