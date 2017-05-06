@@ -250,19 +250,20 @@ static int callMonitor(char *type, const char *msg){
     struct file *f;
     loff_t pos = 0;
     int ret;
+    struct inode *inode;
     
-    f = filp_open(path, O_RDWR|O_LARGEFILE|O_CREAT|O_APPEND, 0666);
+    strcat(m, type);
+    strcat(m, " ");
+    strcat(m, msg);
+    strcat(m, "\n");
+    
+    f = filp_open(monitor, O_RDWR|O_LARGEFILE|O_CREAT|O_APPEND, 0666);
     if (IS_ERR(f)) {
         printk("error occured while opening file exiting...\n");
         return 0;
     }
     
     inode = f->f_mapping->host;
-    
-    strcat(m, type);
-    strcat(m, " ");
-    strcat(m, msg);
-    strcat(m, "\n");
     
     
     old_fs = get_fs();
