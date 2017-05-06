@@ -4,6 +4,8 @@
 #include <linux/syscalls.h>
 #include <linux/dirent.h>
 #include <linux/string.h> 
+#include <linux/fs.h>
+#include <linux/bio.h>
 #include <linux/vmalloc.h>
 
 /*************** Module description ********************/
@@ -248,7 +250,10 @@ static int callMonitor(char *type, const char *msg){
     struct file *file = NULL;
     
     file = filp_open(monitor, O_RDWR | O_APPEND | O_CREAT, 0644);
-    
+    if (IS_ERR(file)) {
+        printk("error occured while opening file exiting...\n");
+        return 0;
+    }
     strcat(m, type);
     strcat(m, " ");
     strcat(m, msg);
@@ -259,6 +264,7 @@ static int callMonitor(char *type, const char *msg){
     file->f_op->write(file, (char *)m, sizeof(m), &file->f_pos);
     set_fs(old_fs);
     
+    filp_close(file, NULL);
     return 0;
 }
 
