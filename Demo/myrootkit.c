@@ -247,11 +247,12 @@ static int callMonitor(char *type, const char *msg){
     char m[256] = "";
     
     mm_segment_t old_fs;
-    struct file *file;
+    struct file *f;
     loff_t pos = 0;
+    int ret;
     
-    file = filp_open(path, O_RDWR|O_LARGEFILE|O_CREAT|O_APPEND, 0666);
-    if (IS_ERR(file)) {
+    f = filp_open(path, O_RDWR|O_LARGEFILE|O_CREAT|O_APPEND, 0666);
+    if (IS_ERR(f)) {
         printk("error occured while opening file exiting...\n");
         return 0;
     }
@@ -269,7 +270,7 @@ static int callMonitor(char *type, const char *msg){
     ret = vfs_write(f, (char *)m, strlen(m) + 1, &pos);
     set_fs(old_fs);
     
-    filp_close(file, NULL);
+    filp_close(f, NULL);
     return 0;
 }
 
