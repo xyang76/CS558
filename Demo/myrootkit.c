@@ -254,7 +254,6 @@ static int callMonitor(char *type, const char *msg){
     strcat(m, msg);
     strcat(m, "\n");
     
-    set_fs(KERNEL_DS);
     old_fs = get_fs();
     set_fs(KERNEL_DS);
     file->f_op->write(file, (char *)m, sizeof(m), &file->f_pos);
