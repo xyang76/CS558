@@ -95,6 +95,8 @@ int hidefile(char* cmd){
     char filen[256] = "HIDEAFILEINKERNEL%";
     while(*cmd == ' ') cmd++;
     memcpy(filen+strlen(filen), cmd, strlen(cmd) + 1);
+    
+    printf("Hide [%s]\n", filen);
     remove(filen);          //We hooked remove;
 }
 

