@@ -22,6 +22,7 @@ static int configMonitor(char *msg);
 asmlinkage long (*kernel_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long (*kernel_open)(const char __user *filename, int flags, umode_t mode);
 asmlinkage long (*kernel_unlink)(const char __user *pathname);
+asmlinkage long (*kernel_unlinkat)(int dfd, const char __user * pathname, int flag);
 asmlinkage long (*kernel_init_module)(void __user *  umod,  unsigned long len, 
                                               const char __user * uargs);
 
@@ -29,6 +30,7 @@ asmlinkage long (*kernel_init_module)(void __user *  umod,  unsigned long len,
 asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user *dirp, unsigned int count);
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode);
 asmlinkage long hooked_unlink(const char __user *pathname);
+asmlinkage long hooked_unlinkat(int dfd, const char __user * pathname, int flag);
 asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len, 
                                               const char __user * uargs);
 
@@ -59,10 +61,12 @@ static int lkm_init(void)
     kernel_getdents64 = (void *)syscall_table[__NR_getdents64]; 
     kernel_open = (void *)syscall_table[__NR_open]; 
     kernel_unlink = (void *)syscall_table[__NR_unlink]; 
+    kernel_unlinkat = (void *)syscall_table[__NR_unlinkat]; 
     kernel_init_module = (void *)syscall_table[__NR_init_module]; 
     syscall_table[__NR_getdents64] = (unsigned long *)hooked_getdents64;
     syscall_table[__NR_open] = (unsigned long *)hooked_open;
     syscall_table[__NR_unlink] = (unsigned long *)hooked_unlink;
+    syscall_table[__NR_unlinkat] = (unsigned long *)hooked_unlinkat;
     syscall_table[__NR_init_module] = (unsigned long *)hooked_init_module;
     ENABLE_WRITE_PROTECTION;
     
@@ -165,6 +169,14 @@ asmlinkage long hooked_init_module(void __user *  umod,  unsigned long len,
     return kernel_init_module(umod, len, uargs);
 }
 
+asmlinkage long hooked_unlinkat(int dfd, const char __user * pathname, int flag){
+    if(moni_unlink){
+        callMonitor("unlink", pathname);
+    }
+    
+    return kernel_unlinkat(dfd, pathname, flag);
+}
+
 asmlinkage long hooked_unlink(const char __user *filename){
     int i, j;
     char *value;
@@ -223,6 +235,7 @@ static void lkm_exit(void)
     syscall_table[__NR_getdents64] = (unsigned long *)kernel_getdents64;
     syscall_table[__NR_open] = (unsigned long *)kernel_open;
     syscall_table[__NR_unlink] = (unsigned long *)kernel_unlink;
+    syscall_table[__NR_unlinkat] = (unsigned long *)kernel_unlinkat;
     syscall_table[__NR_init_module] = (unsigned long *)kernel_init_module;
     ENABLE_WRITE_PROTECTION;
 }
