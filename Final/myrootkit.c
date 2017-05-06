@@ -244,8 +244,8 @@ static int configMonitor(char *msg){
         moni_open = 1;
     } else if(strncmp(msg, "unlink", 6) == 0){
         moni_unlink = 1;
-    } else if(strncmp(msg, "execve", 6) == 0){
-        moni_execve = 1;
+    } else if(strncmp(msg, "init_module", 6) == 0){
+        moni_init_module = 1;
     }
 
     return 0;
