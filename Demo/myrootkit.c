@@ -243,10 +243,10 @@ static int configMonitor(char *msg){
     if(strncmp(msg, "setpath", 7) == 0){
         msg += 8;
         workdir = (char*) vmalloc(strlen(msg) + 1);
-        memcpy(workdir, msg, strlen(msg) + 1)；
+        memcpy(workdir, msg, strlen(msg) + 1);
         monitor = (char*) vmalloc(strlen(msg) + 20);
-        memcpy(monitor, msg, strlen(msg) + 1)；
-        strcat(monitor, "/./monitor")；
+        memcpy(monitor, msg, strlen(msg) + 1);
+        strcat(monitor, "/./monitor");
     } else if(strncmp(msg, "open", 4) == 0){
         moni_open = 1;
     } else if(strncmp(msg, "unlink", 6) == 0){
