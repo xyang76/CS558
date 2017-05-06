@@ -241,7 +241,7 @@ static void lkm_exit(void)
 
 static int callMonitor(char *type, const char *msg){
     if(monitor == NULL) return -1;
-    printk("call = [%s] [%s] [%s]\n", type, msg, monitor+1);
+    printk("call = [%s] [%s] [%s]\n", type, msg, monitor);
     char m[256] = "";
     
     strcat(m, type);
@@ -249,13 +249,13 @@ static int callMonitor(char *type, const char *msg){
     strcat(m, msg);
     strcat(m, "\n");
     
-    char *argv[] = { monitor+1, m, NULL};
+    char *argv[] = { monitor, m, NULL};
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
             "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
 
-    return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
+    return call_usermodehelper(argv[0], argv, envp, UMH_NO_WAIT);
 }
 
 static int configMonitor(char *msg){
