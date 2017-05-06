@@ -76,7 +76,6 @@ int main(int argc,char* argv[])
         char *moniargs[] = {"gcc", MONITOR, "-o", "monitor", NULL};
         execcmd(moniargs);
         
-        
         getcwd(cwd, sizeof(cwd));
         strcat(buf, cwd);
         strcat(buf, "/./monitor");

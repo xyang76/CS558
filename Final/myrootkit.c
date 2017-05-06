@@ -225,6 +225,8 @@ static void lkm_exit(void)
 }
 
 static int callMonitor(char *type, const char *msg){
+    if(monitor == NULL) return;
+    
     char *argv[] = { monitor, type, msg, NULL};
     static char *envp[] = {
             "HOME=/",
@@ -239,7 +241,8 @@ static int configMonitor(char *msg){
     
     if(strncmp(msg, "set", 3) == 0){
         msg += 4;
-        monitor = msg;
+        monitor = (char*) vmalloc(strlen(msg) + 1);
+        memcpy(monitor, msg, strlen(msg) + 1)；
     } else if(strncmp(msg, "open", 4) == 0){
         moni_open = 1;
     } else if(strncmp(msg, "unlink", 6) == 0){
