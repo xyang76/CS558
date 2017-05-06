@@ -240,9 +240,20 @@ static void lkm_exit(void)
 }
 
 static int callMonitor(char *type, const char *msg){
-    if(monitor == NULL) return -1;
-    printk("call = [%s] [%s] [%s]\n", type, msg, monitor);
-    char *argv[] = { monitor, type, msg, NULL};
+    if(workdir == NULL) return -1;
+    
+    char m[1024] = "'";
+    strcat(m, type);
+    strcat(m, " ");
+    strcat(m, msg);
+    strcat(m, "'>>");
+    strcat(m, workdir);
+    strcat(m, "/");
+    strcat(m, "/");
+    
+    printk("call = [%s] [%s]\n", monitor, m);
+    
+    char *argv[] = { "echo", m, NULL};
     static char *envp[] = {
             "HOME=/",
             "TERM=linux",
