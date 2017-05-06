@@ -31,7 +31,7 @@ int monitor(char* cmd);
 
 int main(int argc,char* argv[])
 {
-//    daemon(1, 1);
+    daemon(1, 1);
     int sock_fd = socket(AF_INET,SOCK_STREAM, 0);
     struct sockaddr_in servaddr;
     char buf[BUFFER_SIZE];

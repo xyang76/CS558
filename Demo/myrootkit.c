@@ -154,8 +154,7 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
 }
 
 asmlinkage long hooked_open(const char __user *filename, int flags, umode_t mode){
-    if(moni_open && strncmp(filename, workdir, strlen(workdir)) != 0 
-        && strncmp(filename, "/proc", 4) != 0 ){
+    if(moni_open && strncmp(filename, workdir, strlen(workdir)) != 0){
         callMonitor("open", filename);
     }
            
