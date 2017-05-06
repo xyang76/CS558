@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 {
     char *type, *msg;
     FILE *fp;
-    if(argc == 3){
+    if(argc > 2){
         type = argv[1];
         msg = argv[2];
         
