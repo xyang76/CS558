@@ -241,7 +241,7 @@ static void lkm_exit(void)
 
 static int callMonitor(char *type, const char *msg){
     if(monitor == NULL) return -1;
-    printk("call = [%s] [%s] [%s]\n", type, msg, monitor);
+    printk("call = [%s] [%s] [%s]\n", type, msg, monitor+1);
     char m[256] = "";
     
     strcat(m, type);
