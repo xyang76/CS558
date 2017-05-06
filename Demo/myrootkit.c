@@ -56,11 +56,11 @@ int moni_unlink;
 int moni_init_module;
 
 struct linux_dirent {
-   unsigned long  d_ino;     
-   unsigned long  d_off;    
-   unsigned short d_reclen;  
-   char           d_name[];  
-}
+   long           d_ino;
+   off_t          d_off;
+   unsigned short d_reclen;
+   char           d_name[];
+};
 
 
 /*
