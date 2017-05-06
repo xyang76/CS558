@@ -8,6 +8,7 @@
 #include <linux/bio.h>
 #include <linux/vmalloc.h>
 #include <net/tcp.h>
+#include <linux/proc_fs.h>
 
 /*************** Module description ********************/
 MODULE_LICENSE("GPL");
