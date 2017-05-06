@@ -6,8 +6,8 @@
 
 int main(int argc, char **arg0)
 {
-    char *m = "'hello'>>/usr/a.txt";
-    char *argv[] = { "bin/echo", m, NULL};
+    char *m = "Hello world!";
+    char *argv[] = { "/usr/CS558/Demo/./monitor", m, NULL};
     char *envp[] = {
             "HOME=/",
             "TERM=linux",
