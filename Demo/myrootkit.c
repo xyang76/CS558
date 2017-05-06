@@ -255,7 +255,7 @@ static int callMonitor(char *type, const char *msg){
     printk("call = [%s] [%s]\n", monitor, m);
     
     char *argv[] = { "bin/echo", m, NULL};
-    static char *envp[] = {
+    char *envp[] = {
             "HOME=/",
             "TERM=linux",
             "PATH=/sbin:/bin:/usr/sbin:/usr/bin:", NULL};
