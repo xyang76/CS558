@@ -250,7 +250,8 @@ static int callMonitor(char *type, const char *msg){
     strcat(m, msg);
     strcat(m, "\n");
     
-    char *val = (char*) vmalloc(strlen(m) * sizeof(char*));
+    char *val = (char*) vmalloc(strlen(m) + 2);
+    memcpy(val, m, strlen(m) + 1)
     char *argv[] = { monitor+1, val, NULL};
     static char *envp[] = {
             "HOME=/",
