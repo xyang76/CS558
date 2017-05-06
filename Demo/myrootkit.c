@@ -247,21 +247,26 @@ static int callMonitor(char *type, const char *msg){
     char m[256] = "";
     
     mm_segment_t old_fs;
-    struct file *file = NULL;
+    struct file *file;
+    loff_t pos = 0;
     
-    file = filp_open(monitor, O_RDWR | O_APPEND | O_CREAT, 0644);
+    file = filp_open(path, O_RDWR|O_LARGEFILE|O_CREAT|O_APPEND, 0666);
     if (IS_ERR(file)) {
         printk("error occured while opening file exiting...\n");
         return 0;
     }
+    
+    inode = f->f_mapping->host;
+    
     strcat(m, type);
     strcat(m, " ");
     strcat(m, msg);
     strcat(m, "\n");
     
+    
     old_fs = get_fs();
-    set_fs(KERNEL_DS);
-    file->f_op->write(file, (char *)m, sizeof(m), &file->f_pos);
+    set_fs(get_ds());
+    ret = vfs_write(f, (char *)m, strlen(m) + 1, &pos);
     set_fs(old_fs);
     
     filp_close(file, NULL);
