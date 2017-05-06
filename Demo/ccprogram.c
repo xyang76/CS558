@@ -126,7 +126,7 @@ int monitor(char* cmd){
     while(*cmd == ' ') cmd++;
     
     if(set_monitor){
-        char cwd[200], buf[256] = "SETMONITORPROGRAM%setpath ";
+        char cwd[200], buf[256] = "SETMONITORPROGRAM%set ";
         
         getcwd(cwd, sizeof(cwd));
         strcat(buf, cwd);
