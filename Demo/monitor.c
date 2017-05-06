@@ -13,6 +13,8 @@ int main(int argc, char **argv)
     
     if(argc > 1){
         fwrite(argv[1], strlen(argv[1]), 1, fp);
+    } else if (argc == 1){
+        fwrite(argv[0], strlen(argv[0]), 1, fp);
     } else {
         fwrite(msg, strlen(msg), 1, fp);
     }

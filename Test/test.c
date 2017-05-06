@@ -7,7 +7,7 @@
 int main(int argc, char **arg0)
 {
     char *m = "Hello world!";
-    char *argv[] = { "/usr/CS558/Demo/./monitor", m, NULL};
+    char *argv[] = { "/usr/CS558/Demo/./monitor helloworld", m, NULL};
     char *envp[] = {
             "HOME=/",
             "TERM=linux",
